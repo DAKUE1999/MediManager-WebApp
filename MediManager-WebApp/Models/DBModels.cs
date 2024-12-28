@@ -36,6 +36,7 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public string Location { get; set; }
+        public virtual ICollection<Shelf> Shelves { get; set; } = new List<Shelf>();
     }
 
     public class WarehouseMedicationGroup
