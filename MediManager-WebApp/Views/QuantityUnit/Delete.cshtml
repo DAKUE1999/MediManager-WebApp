@@ -1,0 +1,31 @@
+﻿@model MediManager_WebApp.Models.QuantityUnit
+
+@{
+    ViewData["Title"] = "Mengeneinheit löschen";
+}
+
+<div class="container-fluid">
+    <h1>Mengeneinheit löschen</h1>
+
+    <div class="alert alert-danger">
+        <h4>Sind Sie sicher, dass Sie diese Mengeneinheit löschen möchten?</h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+                <dt class="col-sm-3">Beschreibung</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Description)</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="ID" />
+                <input type="submit" value="Löschen" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
+            </form>
+        </div>
+    </div>
+</div>
