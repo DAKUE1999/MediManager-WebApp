@@ -1,0 +1,126 @@
+@model IEnumerable<MediManager_WebApp.Models.Warehouse>
+
+@{
+    ViewData["Title"] = "Lager";
+}
+
+<div class="container-fluid">
+    <h1>Lager</h1>
+
+    <p>
+        <button type="button" class="btn btn-primary" onclick="showCreateEditModal()">Neues Lager</button>
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Beschreibung</th>
+                    <th>Standort</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Location)</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-warning" onclick="showCreateEditModal(@item.ID)">Bearbeiten</button>
+                                <button type="button" class="btn btn-danger" onclick="showDeleteModal(@item.ID, '@item.Name')">Löschen</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" id="createEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createEditModalTitle">Lager erstellen/bearbeiten</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+            </div>
+            <div class="modal-body" id="createEditModalContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lager löschen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sind Sie sicher, dass Sie das Lager <strong id="deleteWarehouseName"></strong> löschen möchten?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteWarehouseId" name="id" value="" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="submit" class="btn btn-danger">Löschen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Show Create/Edit Modal
+        function showCreateEditModal(id = null) {
+            const url = id ? `/Warehouse/CreateEdit/${id}` : '/Warehouse/CreateEdit';
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('createEditModalContent').innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('createEditModal'));
+                    modal.show();
+                });
+        }
+
+        // Show Delete Modal
+        function showDeleteModal(id, name) {
+            document.getElementById('deleteWarehouseName').textContent = name;
+            document.getElementById('deleteWarehouseId').value = id;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        // Handle form submissions
+        document.addEventListener('submit', function(e) {
+            if (e.target.matches('#createEditForm, #deleteForm')) {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                fetch(e.target.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else if (data.message) {
+                        alert(data.message);
+                    }
+                });
+            }
+        });
+    </script>
+}
