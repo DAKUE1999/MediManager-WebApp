@@ -1,0 +1,73 @@
+@model MediManager_WebApp.Models.Medication
+
+@{
+    ViewData["Title"] = Model.ID == 0 ? "Medikament erstellen" : "Medikament bearbeiten";
+}
+
+<div class="container-fluid">
+    <h1>@ViewData["Title"]</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="CreateEdit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @if (Model.ID != 0)
+                {
+                    <input type="hidden" asp-for="ID" />
+                }
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label asp-for="MedicationGroupID" class="control-label">Medikamentengruppe</label>
+                            <select asp-for="MedicationGroupID" class="form-select" asp-items="ViewBag.MedicationGroups">
+                                <option value="">-- Bitte wählen --</option>
+                            </select>
+                            <span asp-validation-for="MedicationGroupID" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="PZN" class="control-label">PZN</label>
+                            <input asp-for="PZN" class="form-control" />
+                            <span asp-validation-for="PZN" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="control-label">Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Manufacturer" class="control-label">Hersteller</label>
+                            <input asp-for="Manufacturer" class="form-control" />
+                            <span asp-validation-for="Manufacturer" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="SAPNumber" class="control-label">SAP-Nummer</label>
+                            <input asp-for="SAPNumber" class="form-control" />
+                            <span asp-validation-for="SAPNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="SAPName" class="control-label">SAP-Name</label>
+                            <input asp-for="SAPName" class="form-control" />
+                            <span asp-validation-for="SAPName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                            <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
