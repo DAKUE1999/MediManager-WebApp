@@ -30,7 +30,7 @@ namespace MediManager_WebApp.Controllers
             if (id == null)
             {
                 // Create
-                return PartialView("_CreateEditModal", new WarehouseViewModel());
+                return View("CreateEdit", new WarehouseViewModel());
             }
 
             // Edit
@@ -57,7 +57,7 @@ namespace MediManager_WebApp.Controllers
                 }).ToList()
             };
 
-            return PartialView("_CreateEditModal", viewModel);
+            return View("CreateEdit", viewModel);
         }
 
         // POST: Warehouse/CreateEdit
@@ -72,7 +72,7 @@ namespace MediManager_WebApp.Controllers
                     w.Name == viewModel.Name && w.ID != viewModel.ID))
                 {
                     ModelState.AddModelError("Name", "Dieser Lagername existiert bereits.");
-                    return PartialView("_CreateEditModal", viewModel);
+                    return View("CreateEdit", viewModel);
                 }
 
                 if (viewModel.ID == 0)
@@ -144,15 +144,14 @@ namespace MediManager_WebApp.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return Json(new { success = true });
+                return RedirectToAction("Index");
             }
 
-            return PartialView("_CreateEditModal", viewModel);
+            return View("CreateEdit", viewModel);
         }
 
         // POST: Warehouse/Delete/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var warehouse = await _context.Warehouses
@@ -174,7 +173,7 @@ namespace MediManager_WebApp.Controllers
             _context.Warehouses.Remove(warehouse);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true });
+            return RedirectToAction("Index");
         }
     }
 }

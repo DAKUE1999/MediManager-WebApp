@@ -4,7 +4,7 @@
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 
     public class MedicationGroup
@@ -23,7 +23,7 @@
         public int MedicationGroupID { get; set; }
         public int PZN { get; set; }
         public string Name { get; set; }
-        public string Manufacturer { get; set; }
+        public string? Manufacturer { get; set; }
         public string SAPNumber { get; set; }
         public string SAPName { get; set; }
 
@@ -34,8 +34,8 @@
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string Location { get; set; }
+        public string? Description { get; set; }
+        public string? Location { get; set; }
         public virtual ICollection<Shelf> Shelves { get; set; } = new List<Shelf>();
     }
 
@@ -54,7 +54,7 @@
         public int ID { get; set; }
         public int WarehouseID { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public virtual Warehouse Warehouse { get; set; }
     }
@@ -67,7 +67,7 @@
         public int ShelfID { get; set; }
         public int MedicationID { get; set; }
         public string Batch { get; set; }
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }
         public string ExpireDate { get; set; }
         public int Quantity { get; set; }
         public virtual Warehouse Warehouse { get; set; }
@@ -80,7 +80,7 @@
     {
         public int ID { get; set; }
         public string ReasonCode { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string MovementType { get; set; }
     }
 
@@ -95,7 +95,7 @@
         public int MovementReasonID { get; set; }
         public int Quantity { get; set; }
         public string Batch { get; set; }
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }
         public string ExpireDate { get; set; }
         public string Timestamp { get; set; }
         public int UserID { get; set; }
@@ -113,7 +113,7 @@
         public int ID { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
-        public string Email { get; set; }
+        public string? Email { get; set; }
         public string Role { get; set; }
         public bool ForcePasswordChange { get; set; }
     }
@@ -123,7 +123,6 @@
         public int ID { get; set; }
         public int UserID { get; set; }
         public bool EmailNotifications { get; set; }
-        public bool PopupNotifications { get; set; }
         public virtual User User { get; set; }
     }
 
@@ -133,7 +132,7 @@
         public int UserID { get; set; }
         public string Action { get; set; }
         public string Timestamp { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string Severity { get; set; }
         public string ObjectType { get; set; }
         public int ObjectID { get; set; }

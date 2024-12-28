@@ -40,13 +40,9 @@
                         <td>
                             <div class="btn-group" role="group">
                                 <a asp-action="CreateEdit" asp-route-id="@item.ID" class="btn btn-warning">Bearbeiten</a>
-                                @if (!item.Shelves.Any())
-                                {
-                                    <form asp-action="Delete" asp-route-id="@item.ID" method="post" style="display:inline;">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Sind Sie sicher, dass Sie dieses Lager löschen möchten?');">Löschen</button>
-                                    </form>
-                                }
+                                <form asp-action="Delete" asp-route-id="@item.ID" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Sind Sie sicher, dass Sie dieses Lager löschen möchten?');">Löschen</button>
+                                </form>
                             </div>
                         </td>
                     </tr>

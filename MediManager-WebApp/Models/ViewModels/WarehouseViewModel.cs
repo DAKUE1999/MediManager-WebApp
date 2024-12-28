@@ -4,8 +4,8 @@ namespace MediManager_WebApp.Models.ViewModels
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string Location { get; set; }
+        public string? Description { get; set; }
+        public string? Location { get; set; }
         public List<ShelfViewModel> Shelves { get; set; } = new List<ShelfViewModel>();
     }
 
@@ -13,6 +13,6 @@ namespace MediManager_WebApp.Models.ViewModels
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }
