@@ -55,6 +55,7 @@ namespace MediManager_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEdit([Bind("ID,MedicationGroupID,PZN,Name,Manufacturer,SAPNumber,SAPName")] Medication medication)
         {
+            ModelState.Remove("MedicationGroup");
             if (ModelState.IsValid)
             {
                 // Prüfe ob PZN bereits existiert

@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MediManager_WebApp.Migrations
 {
     [DbContext(typeof(MediManagerDbContext))]
-    [Migration("20241227204852_AddSeedData")]
-    partial class AddSeedData
+    [Migration("20241228152354_Initialize_Database")]
+    partial class Initialize_Database
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,83 +24,6 @@ namespace MediManager_WebApp.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MediManager_WebApp.Models.AuthenticationLog", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("IP")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<bool>("Success")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Timestamp")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("AuthenticationLogs");
-                });
-
-            modelBuilder.Entity("MediManager_WebApp.Models.ExportLog", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("ExportType")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("FileFormat")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int>("RecordCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Timestamp")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("ExportLogs");
-                });
-
             modelBuilder.Entity("MediManager_WebApp.Models.Medication", b =>
                 {
                     b.Property<int>("ID")
@@ -110,30 +33,25 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Manufacturer")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("MedicationGroupID")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("PZN")
                         .HasColumnType("integer");
 
                     b.Property<string>("SAPName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("SAPNumber")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -152,20 +70,21 @@ namespace MediManager_WebApp.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("QuantityUnitID")
                         .HasColumnType("integer");
 
                     b.Property<string>("SupplyNumber")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
                     b.HasIndex("QuantityUnitID");
+
+                    b.HasIndex("SupplyNumber")
+                        .IsUnique();
 
                     b.ToTable("MedicationGroups");
                 });
@@ -179,21 +98,20 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("MovementType")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReasonCode")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ReasonCode")
+                        .IsUnique();
 
                     b.ToTable("MovementReasons");
 
@@ -265,14 +183,11 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -314,14 +229,11 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("WarehouseID")
                         .HasColumnType("integer");
@@ -343,13 +255,11 @@ namespace MediManager_WebApp.Migrations
 
                     b.Property<string>("Batch")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ExpireDate")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("MedicationGroupID")
                         .HasColumnType("integer");
@@ -361,9 +271,7 @@ namespace MediManager_WebApp.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SerialNumber")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("ShelfID")
                         .HasColumnType("integer");
@@ -394,13 +302,11 @@ namespace MediManager_WebApp.Migrations
 
                     b.Property<string>("Batch")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ExpireDate")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("MedicationGroupID")
                         .HasColumnType("integer");
@@ -415,9 +321,7 @@ namespace MediManager_WebApp.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("SerialNumber")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("ShelfID")
                         .HasColumnType("integer");
@@ -427,8 +331,7 @@ namespace MediManager_WebApp.Migrations
 
                     b.Property<string>("Timestamp")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
@@ -455,50 +358,6 @@ namespace MediManager_WebApp.Migrations
                     b.ToTable("StockMovements");
                 });
 
-            modelBuilder.Entity("MediManager_WebApp.Models.SystemLog", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int>("ObjectID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ObjectType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Timestamp")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("SystemLogs");
-                });
-
             modelBuilder.Entity("MediManager_WebApp.Models.User", b =>
                 {
                     b.Property<int>("ID")
@@ -508,56 +367,26 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("ForcePasswordChange")
                         .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("MediManager_WebApp.Models.UserSetting", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<bool>("EmailNotifications")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("PopupNotifications")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
-
-                    b.ToTable("UserSettings");
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("MediManager_WebApp.Models.Warehouse", b =>
@@ -569,21 +398,19 @@ namespace MediManager_WebApp.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Warehouses");
                 });
@@ -614,17 +441,6 @@ namespace MediManager_WebApp.Migrations
                     b.ToTable("WarehouseMedicationGroups");
                 });
 
-            modelBuilder.Entity("MediManager_WebApp.Models.ExportLog", b =>
-                {
-                    b.HasOne("MediManager_WebApp.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MediManager_WebApp.Models.Medication", b =>
                 {
                     b.HasOne("MediManager_WebApp.Models.MedicationGroup", "MedicationGroup")
@@ -650,7 +466,7 @@ namespace MediManager_WebApp.Migrations
             modelBuilder.Entity("MediManager_WebApp.Models.Shelf", b =>
                 {
                     b.HasOne("MediManager_WebApp.Models.Warehouse", "Warehouse")
-                        .WithMany()
+                        .WithMany("Shelves")
                         .HasForeignKey("WarehouseID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -752,28 +568,6 @@ namespace MediManager_WebApp.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("MediManager_WebApp.Models.SystemLog", b =>
-                {
-                    b.HasOne("MediManager_WebApp.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MediManager_WebApp.Models.UserSetting", b =>
-                {
-                    b.HasOne("MediManager_WebApp.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("MediManager_WebApp.Models.UserSetting", "UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MediManager_WebApp.Models.WarehouseMedicationGroup", b =>
                 {
                     b.HasOne("MediManager_WebApp.Models.MedicationGroup", "MedicationGroup")
@@ -783,7 +577,7 @@ namespace MediManager_WebApp.Migrations
                         .IsRequired();
 
                     b.HasOne("MediManager_WebApp.Models.Warehouse", "Warehouse")
-                        .WithMany()
+                        .WithMany("WarehouseMedicationGroups")
                         .HasForeignKey("WarehouseID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -791,6 +585,13 @@ namespace MediManager_WebApp.Migrations
                     b.Navigation("MedicationGroup");
 
                     b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("MediManager_WebApp.Models.Warehouse", b =>
+                {
+                    b.Navigation("Shelves");
+
+                    b.Navigation("WarehouseMedicationGroups");
                 });
 #pragma warning restore 612, 618
         }

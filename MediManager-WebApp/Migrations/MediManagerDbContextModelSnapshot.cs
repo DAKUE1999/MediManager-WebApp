@@ -111,6 +111,64 @@ namespace MediManager_WebApp.Migrations
                         .IsUnique();
 
                     b.ToTable("MovementReasons");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            Description = "Abgabe an Patient",
+                            MovementType = "OUT",
+                            ReasonCode = "PATIENT_HANDOUT"
+                        },
+                        new
+                        {
+                            ID = 2,
+                            Description = "Vernichtung",
+                            MovementType = "OUT",
+                            ReasonCode = "DESTRUCTION"
+                        },
+                        new
+                        {
+                            ID = 3,
+                            Description = "Verfallen",
+                            MovementType = "OUT",
+                            ReasonCode = "EXPIRED"
+                        },
+                        new
+                        {
+                            ID = 4,
+                            Description = "Umlagerung (Ausgang)",
+                            MovementType = "OUT",
+                            ReasonCode = "WAREHOUSE_TRANSFER_OUT"
+                        },
+                        new
+                        {
+                            ID = 5,
+                            Description = "Umlagerung (Eingang)",
+                            MovementType = "IN",
+                            ReasonCode = "WAREHOUSE_TRANSFER_IN"
+                        },
+                        new
+                        {
+                            ID = 6,
+                            Description = "Neue Lieferung",
+                            MovementType = "IN",
+                            ReasonCode = "NEW_STOCK"
+                        },
+                        new
+                        {
+                            ID = 7,
+                            Description = "Korrektur (Zugang)",
+                            MovementType = "IN",
+                            ReasonCode = "CORRECTION_IN"
+                        },
+                        new
+                        {
+                            ID = 8,
+                            Description = "Korrektur (Abgang)",
+                            MovementType = "OUT",
+                            ReasonCode = "CORRECTION_OUT"
+                        });
                 });
 
             modelBuilder.Entity("MediManager_WebApp.Models.QuantityUnit", b =>
@@ -131,6 +189,32 @@ namespace MediManager_WebApp.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("QuantityUnits");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            Description = "Einzelne Einheit (EA)",
+                            Name = "Stück"
+                        },
+                        new
+                        {
+                            ID = 2,
+                            Description = "Flüssigkeiten in Flasche (BT)",
+                            Name = "Flasche"
+                        },
+                        new
+                        {
+                            ID = 3,
+                            Description = "Flüssigkeitsmenge in ml",
+                            Name = "Milliliter"
+                        },
+                        new
+                        {
+                            ID = 4,
+                            Description = "Gewicht in g",
+                            Name = "Gramm"
+                        });
                 });
 
             modelBuilder.Entity("MediManager_WebApp.Models.Shelf", b =>
@@ -328,6 +412,32 @@ namespace MediManager_WebApp.Migrations
                     b.ToTable("Warehouses");
                 });
 
+            modelBuilder.Entity("MediManager_WebApp.Models.WarehouseMedicationGroup", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("MedicationGroupID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WarehouseID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MedicationGroupID");
+
+                    b.HasIndex("WarehouseID");
+
+                    b.ToTable("WarehouseMedicationGroups");
+                });
+
             modelBuilder.Entity("MediManager_WebApp.Models.Medication", b =>
                 {
                     b.HasOne("MediManager_WebApp.Models.MedicationGroup", "MedicationGroup")
@@ -455,9 +565,30 @@ namespace MediManager_WebApp.Migrations
                     b.Navigation("Warehouse");
                 });
 
+            modelBuilder.Entity("MediManager_WebApp.Models.WarehouseMedicationGroup", b =>
+                {
+                    b.HasOne("MediManager_WebApp.Models.MedicationGroup", "MedicationGroup")
+                        .WithMany()
+                        .HasForeignKey("MedicationGroupID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediManager_WebApp.Models.Warehouse", "Warehouse")
+                        .WithMany("WarehouseMedicationGroups")
+                        .HasForeignKey("WarehouseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicationGroup");
+
+                    b.Navigation("Warehouse");
+                });
+
             modelBuilder.Entity("MediManager_WebApp.Models.Warehouse", b =>
                 {
                     b.Navigation("Shelves");
+
+                    b.Navigation("WarehouseMedicationGroups");
                 });
 #pragma warning restore 612, 618
         }

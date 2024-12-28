@@ -32,8 +32,7 @@
                     <th>Gruppe</th>
                     <th>Versorgungsnummer</th>
                     <th>Mengeneinheit</th>
-                    <th>Mindestmenge</th>
-                    <th>Maximalmenge</th>
+                    <th>Soll-Bestand</th>
                     <th>Aktionen</th>
                 </tr>
             </thead>
@@ -44,8 +43,7 @@
                         <td>@Html.DisplayFor(modelItem => item.MedicationGroup.Name)</td>
                         <td>@Html.DisplayFor(modelItem => item.MedicationGroup.SupplyNumber)</td>
                         <td>@Html.DisplayFor(modelItem => item.MedicationGroup.QuantityUnit.Name)</td>
-                        <td>@Html.DisplayFor(modelItem => item.MinQuantity)</td>
-                        <td>@Html.DisplayFor(modelItem => item.MaxQuantity)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a asp-action="CreateEdit" asp-route-warehouseId="@ViewBag.WarehouseId" asp-route-id="@item.ID" class="btn btn-warning">Bearbeiten</a>

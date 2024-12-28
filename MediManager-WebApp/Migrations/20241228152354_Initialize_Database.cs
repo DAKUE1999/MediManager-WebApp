@@ -3,40 +3,25 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MediManager_WebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initialize_Database : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "AuthenticationLogs",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Action = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Timestamp = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    IP = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Username = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Success = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuthenticationLogs", x => x.ID);
-                });
-
             migrationBuilder.CreateTable(
                 name: "MovementReasons",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ReasonCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    MovementType = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    ReasonCode = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    MovementType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,8 +34,8 @@ namespace MediManager_WebApp.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -58,20 +43,20 @@ namespace MediManager_WebApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "User",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Username = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Role = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: false),
                     ForcePasswordChange = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.ID);
+                    table.PrimaryKey("PK_User", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,9 +65,9 @@ namespace MediManager_WebApp.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Location = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -96,8 +81,8 @@ namespace MediManager_WebApp.Migrations
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QuantityUnitID = table.Column<int>(type: "integer", nullable: false),
-                    SupplyNumber = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    SupplyNumber = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -111,84 +96,14 @@ namespace MediManager_WebApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExportLogs",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
-                    Timestamp = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    ExportType = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    FileName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    FileFormat = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    RecordCount = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ExportLogs", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_ExportLogs_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SystemLogs",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
-                    Action = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Timestamp = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Severity = table.Column<string>(type: "text", nullable: false),
-                    ObjectType = table.Column<string>(type: "text", nullable: false),
-                    ObjectID = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemLogs", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_SystemLogs_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserSettings",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
-                    EmailNotifications = table.Column<bool>(type: "boolean", nullable: false),
-                    PopupNotifications = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserSettings", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_UserSettings_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Shelves",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     WarehouseID = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -209,10 +124,10 @@ namespace MediManager_WebApp.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MedicationGroupID = table.Column<int>(type: "integer", nullable: false),
                     PZN = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Manufacturer = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    SAPNumber = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    SAPName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Manufacturer = table.Column<string>(type: "text", nullable: true),
+                    SAPNumber = table.Column<string>(type: "text", nullable: false),
+                    SAPName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,9 +177,9 @@ namespace MediManager_WebApp.Migrations
                     MedicationGroupID = table.Column<int>(type: "integer", nullable: false),
                     ShelfID = table.Column<int>(type: "integer", nullable: false),
                     MedicationID = table.Column<int>(type: "integer", nullable: false),
-                    Batch = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    SerialNumber = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    ExpireDate = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Batch = table.Column<string>(type: "text", nullable: false),
+                    SerialNumber = table.Column<string>(type: "text", nullable: true),
+                    ExpireDate = table.Column<string>(type: "text", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -309,10 +224,10 @@ namespace MediManager_WebApp.Migrations
                     StockID = table.Column<int>(type: "integer", nullable: false),
                     MovementReasonID = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    Batch = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    SerialNumber = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    ExpireDate = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Timestamp = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Batch = table.Column<string>(type: "text", nullable: false),
+                    SerialNumber = table.Column<string>(type: "text", nullable: true),
+                    ExpireDate = table.Column<string>(type: "text", nullable: false),
+                    Timestamp = table.Column<string>(type: "text", nullable: false),
                     UserID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -349,9 +264,9 @@ namespace MediManager_WebApp.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StockMovements_Users_UserID",
+                        name: "FK_StockMovements_User_UserID",
                         column: x => x.UserID,
-                        principalTable: "Users",
+                        principalTable: "User",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -362,10 +277,31 @@ namespace MediManager_WebApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_ExportLogs_UserID",
-                table: "ExportLogs",
-                column: "UserID");
+            migrationBuilder.InsertData(
+                table: "MovementReasons",
+                columns: new[] { "ID", "Description", "MovementType", "ReasonCode" },
+                values: new object[,]
+                {
+                    { 1, "Abgabe an Patient", "OUT", "PATIENT_HANDOUT" },
+                    { 2, "Vernichtung", "OUT", "DESTRUCTION" },
+                    { 3, "Verfallen", "OUT", "EXPIRED" },
+                    { 4, "Umlagerung (Ausgang)", "OUT", "WAREHOUSE_TRANSFER_OUT" },
+                    { 5, "Umlagerung (Eingang)", "IN", "WAREHOUSE_TRANSFER_IN" },
+                    { 6, "Neue Lieferung", "IN", "NEW_STOCK" },
+                    { 7, "Korrektur (Zugang)", "IN", "CORRECTION_IN" },
+                    { 8, "Korrektur (Abgang)", "OUT", "CORRECTION_OUT" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "QuantityUnits",
+                columns: new[] { "ID", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Einzelne Einheit (EA)", "Stück" },
+                    { 2, "Flüssigkeiten in Flasche (BT)", "Flasche" },
+                    { 3, "Flüssigkeitsmenge in ml", "Milliliter" },
+                    { 4, "Gewicht in g", "Gramm" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_MedicationGroups_QuantityUnitID",
@@ -373,9 +309,21 @@ namespace MediManager_WebApp.Migrations
                 column: "QuantityUnitID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MedicationGroups_SupplyNumber",
+                table: "MedicationGroups",
+                column: "SupplyNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Medications_MedicationGroupID",
                 table: "Medications",
                 column: "MedicationGroupID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MovementReasons_ReasonCode",
+                table: "MovementReasons",
+                column: "ReasonCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shelves_WarehouseID",
@@ -438,17 +386,6 @@ namespace MediManager_WebApp.Migrations
                 column: "WarehouseID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SystemLogs_UserID",
-                table: "SystemLogs",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserSettings_UserID",
-                table: "UserSettings",
-                column: "UserID",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_WarehouseMedicationGroups_MedicationGroupID",
                 table: "WarehouseMedicationGroups",
                 column: "MedicationGroupID");
@@ -457,25 +394,19 @@ namespace MediManager_WebApp.Migrations
                 name: "IX_WarehouseMedicationGroups_WarehouseID",
                 table: "WarehouseMedicationGroups",
                 column: "WarehouseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Warehouses_Name",
+                table: "Warehouses",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AuthenticationLogs");
-
-            migrationBuilder.DropTable(
-                name: "ExportLogs");
-
-            migrationBuilder.DropTable(
                 name: "StockMovements");
-
-            migrationBuilder.DropTable(
-                name: "SystemLogs");
-
-            migrationBuilder.DropTable(
-                name: "UserSettings");
 
             migrationBuilder.DropTable(
                 name: "WarehouseMedicationGroups");
@@ -487,7 +418,7 @@ namespace MediManager_WebApp.Migrations
                 name: "Stocks");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "Medications");

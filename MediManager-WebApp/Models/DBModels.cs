@@ -14,7 +14,7 @@
         public string SupplyNumber { get; set; }
         public string Name { get; set; }
 
-        public virtual QuantityUnit QuantityUnit { get; set; }
+        public virtual QuantityUnit? QuantityUnit { get; set; }
     }
 
     public class Medication
@@ -27,7 +27,7 @@
         public string SAPNumber { get; set; }
         public string SAPName { get; set; }
 
-        public virtual MedicationGroup MedicationGroup { get; set; }
+        public virtual MedicationGroup? MedicationGroup { get; set; }
     }
 
     public class Warehouse
@@ -36,7 +36,8 @@
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
-        public virtual ICollection<Shelf> Shelves { get; set; } = new List<Shelf>();
+        public virtual ICollection<Shelf>? Shelves { get; set; } = new List<Shelf>();
+        public virtual ICollection<WarehouseMedicationGroup>? WarehouseMedicationGroups { get; set; } = new List<WarehouseMedicationGroup>();
     }
 
     public class WarehouseMedicationGroup
@@ -45,8 +46,8 @@
         public int WarehouseID { get; set; }
         public int MedicationGroupID { get; set; }
         public int Quantity { get; set; }
-        public virtual Warehouse Warehouse { get; set; }
-        public virtual MedicationGroup MedicationGroup { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
+        public virtual MedicationGroup? MedicationGroup { get; set; }
     }
 
     public class Shelf
@@ -56,7 +57,7 @@
         public string Name { get; set; }
         public string? Description { get; set; }
 
-        public virtual Warehouse Warehouse { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
     }
 
     public class Stock
@@ -70,10 +71,10 @@
         public string? SerialNumber { get; set; }
         public string ExpireDate { get; set; }
         public int Quantity { get; set; }
-        public virtual Warehouse Warehouse { get; set; }
-        public virtual MedicationGroup MedicationGroup { get; set; }
-        public virtual Shelf Shelf { get; set; }
-        public virtual Medication Medication { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
+        public virtual MedicationGroup? MedicationGroup { get; set; }
+        public virtual Shelf? Shelf { get; set; }
+        public virtual Medication? Medication { get; set; }
     }
 
     public class MovementReason
@@ -99,13 +100,13 @@
         public string ExpireDate { get; set; }
         public string Timestamp { get; set; }
         public int UserID { get; set; }
-        public virtual Warehouse Warehouse { get; set; }
-        public virtual MedicationGroup MedicationGroup { get; set; }
-        public virtual Shelf Shelf { get; set; }
-        public virtual Medication Medication { get; set; }
-        public virtual Stock Stock { get; set; }
-        public virtual MovementReason MovementReason { get; set; }
-        public virtual User User { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
+        public virtual MedicationGroup? MedicationGroup { get; set; }
+        public virtual Shelf? Shelf { get; set; }
+        public virtual Medication? Medication { get; set; }
+        public virtual Stock? Stock { get; set; }
+        public virtual MovementReason? MovementReason { get; set; }
+        public virtual User? User { get; set; }
     }
 
     public class User
@@ -123,7 +124,7 @@
         public int ID { get; set; }
         public int UserID { get; set; }
         public bool EmailNotifications { get; set; }
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
     }
 
     public class SystemLog
@@ -136,7 +137,7 @@
         public string Severity { get; set; }
         public string ObjectType { get; set; }
         public int ObjectID { get; set; }
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
     }
 
     public class ExportLog
@@ -148,7 +149,7 @@
         public string FileName { get; set; }
         public string FileFormat { get; set; }
         public int RecordCount { get; set; }
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
     }
 
     public class AuthenticationLog

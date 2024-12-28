@@ -26,6 +26,7 @@
                     <th>Beschreibung</th>
                     <th>Standort</th>
                     <th>Anzahl Regale</th>
+                    <th>Anzahl Medikamentengruppen</th>
                     <th>Aktionen</th>
                 </tr>
             </thead>
@@ -37,12 +38,14 @@
                         <td>@Html.DisplayFor(modelItem => item.Description)</td>
                         <td>@Html.DisplayFor(modelItem => item.Location)</td>
                         <td>@item.Shelves.Count</td>
+                        <td>@item.WarehouseMedicationGroups.Count</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a asp-action="CreateEdit" asp-route-id="@item.ID" class="btn btn-warning">Bearbeiten</a>
                                 <form asp-action="Delete" asp-route-id="@item.ID" method="post" style="display:inline;">
                                     <button type="submit" class="btn btn-danger" onclick="return confirm('Sind Sie sicher, dass Sie dieses Lager löschen möchten?');">Löschen</button>
                                 </form>
+                                <a asp-action="Index" asp-route-warehouseId="@item.ID" asp-controller="WarehouseMedicationGroup" class="btn btn-primary">Soll-Bestand hinzufügen</a>
                             </div>
                         </td>
                     </tr>

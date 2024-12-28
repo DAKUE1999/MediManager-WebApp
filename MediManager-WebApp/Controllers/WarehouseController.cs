@@ -20,6 +20,7 @@ namespace MediManager_WebApp.Controllers
         {
             var warehouses = await _context.Warehouses
                 .Include(w => w.Shelves)
+                .Include(w => w.WarehouseMedicationGroups)
                 .ToListAsync();
             return View(warehouses);
         }
