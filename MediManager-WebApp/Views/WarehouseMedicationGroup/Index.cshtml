@@ -1,0 +1,63 @@
+@model IEnumerable<MediManager_WebApp.Models.WarehouseMedicationGroup>
+
+@{
+    ViewData["Title"] = $"Medikamentengruppen in {ViewBag.WarehouseName}";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Warehouse" asp-action="Index">Lager</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@ViewBag.WarehouseName</li>
+        </ol>
+    </nav>
+
+    <h1>@ViewData["Title"]</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <p>
+        <a asp-action="CreateEdit" asp-route-warehouseId="@ViewBag.WarehouseId" class="btn btn-primary">Gruppe hinzufügen</a>
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Gruppe</th>
+                    <th>Versorgungsnummer</th>
+                    <th>Mengeneinheit</th>
+                    <th>Mindestmenge</th>
+                    <th>Maximalmenge</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.MedicationGroup.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.MedicationGroup.SupplyNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.MedicationGroup.QuantityUnit.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.MinQuantity)</td>
+                        <td>@Html.DisplayFor(modelItem => item.MaxQuantity)</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="CreateEdit" asp-route-warehouseId="@ViewBag.WarehouseId" asp-route-id="@item.ID" class="btn btn-warning">Bearbeiten</a>
+                                <form asp-action="Delete" asp-route-id="@item.ID" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Sind Sie sicher, dass Sie diese Gruppe entfernen möchten?');">Entfernen</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
