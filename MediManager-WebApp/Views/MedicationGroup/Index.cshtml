@@ -1,0 +1,49 @@
+@model IEnumerable<MediManager_WebApp.Models.MedicationGroup>
+
+@{
+    ViewData["Title"] = "Medikamentengruppen";
+}
+
+<div class="container-fluid">
+    <h1>Medikamentengruppen</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Neue Medikamentengruppe</a>
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Versorgungsnummer</th>
+                    <th>Name</th>
+                    <th>Mengeneinheit</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.SupplyNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.QuantityUnit.Name)</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-warning">Bearbeiten</a>
+                                <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-danger">Löschen</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
