@@ -16,7 +16,6 @@ namespace MediManager_WebApp.Controllers
             _context = context;
         }
 
-        // GET: Stock
         public async Task<IActionResult> Index(int warehouseId)
         {
             var warehouse = await _context.Warehouses
@@ -58,12 +57,9 @@ namespace MediManager_WebApp.Controllers
             return View(stocks);
         }
 
-        // GET: Stock/Create/5 (WarehouseID)
         public async Task<IActionResult> Create(int warehouseId)
         {
             var warehouse = await _context.Warehouses
-                .Include(w => w.WarehouseMedicationGroups)
-                    .ThenInclude(wmg => wmg.MedicationGroup)
                 .Include(w => w.Shelves)
                 .FirstOrDefaultAsync(w => w.ID == warehouseId);
 
@@ -76,30 +72,57 @@ namespace MediManager_WebApp.Controllers
             ViewBag.WarehouseId = warehouse.ID;
             ViewBag.Shelves = new SelectList(warehouse.Shelves, "ID", "Name");
 
-            // Hole nur die Gruppen, die diesem Lager zugeordnet sind
-            var availableGroups = warehouse.WarehouseMedicationGroups
-                .Select(wmg => wmg.MedicationGroup)
-                .OrderBy(mg => mg.Name)
-                .ToList();
-
-            ViewBag.MedicationGroups = availableGroups;
-            
             return View(new StockViewModel
             {
                 WarehouseID = warehouseId,
-                WarehouseName = warehouse.Name,
-                ExpiryDate = DateTime.Today.AddMonths(1) // Default: 1 Monat in der Zukunft
+                ExpiryDate = DateTime.Today.AddMonths(1)
             });
         }
 
-        // POST: Stock/Create
+        [HttpGet]
+        public async Task<IActionResult> CheckPZN(int pzn)
+        {
+            var medication = await _context.Medications
+                .Include(m => m.MedicationGroup)
+                .FirstOrDefaultAsync(m => m.PZN == pzn);
+
+            if (medication == null)
+            {
+                return Json(new { found = false });
+            }
+
+            // Prüfen ob die Gruppe dem Lager zugeordnet ist
+            var hasGroup = await _context.WarehouseMedicationGroups
+                .AnyAsync(wmg => wmg.WarehouseID == medication.MedicationGroupID);
+
+            if (!hasGroup)
+            {
+                return Json(new { 
+                    found = false,
+                    errorMessage = $"Die Medikamentengruppe '{medication.MedicationGroup.Name}' ist diesem Lager noch nicht zugeordnet."
+                });
+            }
+
+            return Json(new
+            {
+                found = true,
+                medication = new
+                {
+                    id = medication.ID,
+                    name = medication.Name,
+                    manufacturer = medication.Manufacturer,
+                    groupId = medication.MedicationGroupID,
+                    groupName = medication.MedicationGroup.Name
+                }
+            });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StockViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Prüfe ob die Seriennummer bereits existiert
                 if (!string.IsNullOrEmpty(model.SerialNumber) &&
                     await _context.Stocks.AnyAsync(s => s.SerialNumber == model.SerialNumber))
                 {
@@ -107,7 +130,6 @@ namespace MediManager_WebApp.Controllers
                     return await PrepareViewForError(model);
                 }
 
-                // Prüfe ob das Verfallsdatum in der Zukunft liegt
                 if (model.ExpiryDate.Date <= DateTime.Today)
                 {
                     ModelState.AddModelError("ExpiryDate", "Das Verfallsdatum muss in der Zukunft liegen.");
@@ -138,8 +160,6 @@ namespace MediManager_WebApp.Controllers
         private async Task<IActionResult> PrepareViewForError(StockViewModel model)
         {
             var warehouse = await _context.Warehouses
-                .Include(w => w.WarehouseMedicationGroups)
-                    .ThenInclude(wmg => wmg.MedicationGroup)
                 .Include(w => w.Shelves)
                 .FirstOrDefaultAsync(w => w.ID == model.WarehouseID);
 
@@ -147,32 +167,7 @@ namespace MediManager_WebApp.Controllers
             ViewBag.WarehouseId = warehouse.ID;
             ViewBag.Shelves = new SelectList(warehouse.Shelves, "ID", "Name", model.ShelfID);
 
-            var availableGroups = warehouse.WarehouseMedicationGroups
-                .Select(wmg => wmg.MedicationGroup)
-                .OrderBy(mg => mg.Name)
-                .ToList();
-
-            ViewBag.MedicationGroups = availableGroups;
-
             return View(model);
-        }
-
-        // GET: Stock/GetMedicationsForGroup/5
-        public async Task<IActionResult> GetMedicationsForGroup(int groupId)
-        {
-            var medications = await _context.Medications
-                .Where(m => m.MedicationGroupID == groupId)
-                .OrderBy(m => m.Name)
-                .Select(m => new MedicationSelectionViewModel
-                {
-                    ID = m.ID,
-                    Name = m.Name,
-                    PZN = m.PZN.ToString(),
-                    Manufacturer = m.Manufacturer
-                })
-                .ToListAsync();
-
-            return Json(medications);
         }
     }
 }
