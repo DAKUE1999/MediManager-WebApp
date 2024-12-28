@@ -1,4 +1,4 @@
-@model MediManager_WebApp.Models.Warehouse
+@model MediManager_WebApp.Models.ViewModels.WarehouseViewModel
 
 <form id="createEditForm" asp-action="CreateEdit" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -26,12 +26,64 @@
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
 
+    <div class="form-group mb-3">
+        <label class="control-label">Regale</label>
+        <div id="shelvesList">
+            @for (int i = 0; i < Model.Shelves.Count; i++)
+            {
+                <div class="shelf-item mb-2">
+                    <input type="hidden" name="Shelves[@i].ID" value="@Model.Shelves[i].ID" />
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="Shelves[@i].Name" value="@Model.Shelves[i].Name" placeholder="Regalname" />
+                        <input type="text" class="form-control" name="Shelves[@i].Description" value="@Model.Shelves[i].Description" placeholder="Beschreibung" />
+                        <button type="button" class="btn btn-danger remove-shelf">X</button>
+                    </div>
+                </div>
+            }
+        </div>
+        <button type="button" class="btn btn-secondary mt-2" id="addShelf">+ Regal hinzufügen</button>
+    </div>
+
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
         <button type="submit" class="btn btn-primary">Speichern</button>
     </div>
 </form>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+<template id="shelfTemplate">
+    <div class="shelf-item mb-2">
+        <div class="input-group">
+            <input type="text" class="form-control" name="Shelves[INDEX].Name" placeholder="Regalname" />
+            <input type="text" class="form-control" name="Shelves[INDEX].Description" placeholder="Beschreibung" />
+            <button type="button" class="btn btn-danger remove-shelf">X</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    document.getElementById('addShelf').addEventListener('click', function() {
+        const template = document.getElementById('shelfTemplate').innerHTML;
+        const shelvesList = document.getElementById('shelvesList');
+        const index = shelvesList.children.length;
+        const newShelf = template.replace(/INDEX/g, index);
+        shelvesList.insertAdjacentHTML('beforeend', newShelf);
+    });
+
+    document.getElementById('shelvesList').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-shelf')) {
+            e.target.closest('.shelf-item').remove();
+            // Indizes neu durchnummerieren
+            updateShelfIndices();
+        }
+    });
+
+    function updateShelfIndices() {
+        const shelves = document.querySelectorAll('.shelf-item');
+        shelves.forEach((shelf, index) => {
+            const inputs = shelf.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.name = input.name.replace(/Shelves\[\d+\]/, `Shelves[${index}]`);
+            });
+        });
+    }
+</script>
