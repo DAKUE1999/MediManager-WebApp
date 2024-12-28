@@ -38,7 +38,6 @@ namespace MediManager_WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Prüfe ob SupplyNumber bereits existiert
                 if (await _context.MedicationGroups.AnyAsync(m => m.SupplyNumber == medicationGroup.SupplyNumber))
                 {
                     ModelState.AddModelError("SupplyNumber", "Diese Versorgungsnummer existiert bereits.");
@@ -85,9 +84,7 @@ namespace MediManager_WebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                // Prüfe ob SupplyNumber bereits existiert (außer bei der aktuellen Gruppe)
-                if (await _context.MedicationGroups.AnyAsync(m => 
-                    m.SupplyNumber == medicationGroup.SupplyNumber && m.ID != medicationGroup.ID))
+                if (await _context.MedicationGroups.AnyAsync(m => m.SupplyNumber == medicationGroup.SupplyNumber && m.ID != medicationGroup.ID))
                 {
                     ModelState.AddModelError("SupplyNumber", "Diese Versorgungsnummer existiert bereits.");
                     ViewData["QuantityUnits"] = new SelectList(_context.QuantityUnits, "ID", "Name", medicationGroup.QuantityUnitID);
@@ -144,7 +141,6 @@ namespace MediManager_WebApp.Controllers
             var medicationGroup = await _context.MedicationGroups.FindAsync(id);
             if (medicationGroup != null)
             {
-                // Prüfe ob die Gruppe bereits verwendet wird
                 var hasRelatedItems = await _context.Medications.AnyAsync(m => m.MedicationGroupID == id);
                 if (hasRelatedItems)
                 {
