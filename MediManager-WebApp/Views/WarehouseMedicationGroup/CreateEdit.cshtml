@@ -1,0 +1,69 @@
+@model MediManager_WebApp.Models.WarehouseMedicationGroup
+
+@{
+    var isEdit = Model.ID != 0;
+    ViewData["Title"] = isEdit ? "Medikamentengruppe bearbeiten" : "Medikamentengruppe hinzufügen";
+}
+
+<div class="container-fluid">
+    <h1>@ViewData["Title"]</h1>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Warehouse" asp-action="Index">Lager</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-warehouseId="@ViewBag.WarehouseId">Medikamentengruppen</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="CreateEdit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="ID" />
+                <input type="hidden" asp-for="WarehouseID" value="@ViewBag.WarehouseId" />
+
+                <div class="card">
+                    <div class="card-body">
+                        @if (!isEdit)
+                        {
+                            <div class="form-group mb-3">
+                                <label asp-for="MedicationGroupID" class="control-label">Medikamentengruppe</label>
+                                <select asp-for="MedicationGroupID" class="form-select" asp-items="ViewBag.MedicationGroups">
+                                    <option value="">-- Bitte wählen --</option>
+                                </select>
+                                <span asp-validation-for="MedicationGroupID" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="MedicationGroupID" />
+                        }
+
+                        <div class="form-group mb-3">
+                            <label asp-for="MinQuantity" class="control-label">Mindestmenge</label>
+                            <input asp-for="MinQuantity" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="MinQuantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="MaxQuantity" class="control-label">Maximalmenge</label>
+                            <input asp-for="MaxQuantity" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="MaxQuantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                            <a asp-action="Index" asp-route-warehouseId="@ViewBag.WarehouseId" class="btn btn-secondary">Zurück zur Liste</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
