@@ -1,0 +1,32 @@
+@model MediManager_WebApp.Models.MedicationGroup
+
+@{
+    ViewData["Title"] = "Medikamentengruppe löschen";
+}
+
+<div class="container-fluid">
+    <h1>Medikamentengruppe löschen</h1>
+
+    <div class="alert alert-danger">
+        <h4>Sind Sie sicher, dass Sie diese Medikamentengruppe löschen möchten?</h4>
+    </div>
+
+    <div>
+        <dl class="row">
+            <dt class="col-sm-3">Versorgungsnummer</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.SupplyNumber)</dd>
+
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+            <dt class="col-sm-3">Mengeneinheit</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.QuantityUnit.Name)</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="ID" />
+            <input type="submit" value="Löschen" class="btn btn-danger" />
+            <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
+        </form>
+    </div>
+</div>
