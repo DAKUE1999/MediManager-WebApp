@@ -1,19 +1,20 @@
-    // Innerhalb der CreateEdit Action im Controller:
-    // ViewBag.MedicationGroups erweitern um mehr Informationen:
-    var availableGroups = await _context.MedicationGroups
-        .Include(mg => mg.QuantityUnit)
-        .Where(mg => !existingGroupIds.Contains(mg.ID))
-        .OrderBy(mg => mg.Name)
-        .Select(mg => new SelectListItem
-        {
-            Value = mg.ID.ToString(),
-            Text = mg.Name,
-            Group = new SelectListGroup { Name = mg.SupplyNumber },
-            DataGroupField = mg.QuantityUnit.Name
-        })
-        .ToListAsync();
+using MediManager_WebApp.Database;
+using MediManager_WebApp.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-<<<<<<< HEAD
+namespace MediManager_WebApp.Controllers
+{
+    public class WarehouseMedicationGroupController : Controller
+    {
+        private readonly MediManagerDbContext _context;
+
+        public WarehouseMedicationGroupController(MediManagerDbContext context)
+        {
+            _context = context;
+        }
+
         // GET: WarehouseMedicationGroup/Index/5 (WarehouseID)
         public async Task<IActionResult> Index(int warehouseId)
         {
@@ -44,11 +45,19 @@
                 .ToListAsync();
 
             var availableGroups = await _context.MedicationGroups
+                .Include(mg => mg.QuantityUnit)
                 .Where(mg => !existingGroupIds.Contains(mg.ID))
                 .OrderBy(mg => mg.Name)
+                .Select(mg => new SelectListItem
+                {
+                    Value = mg.ID.ToString(),
+                    Text = mg.Name,
+                    Group = new SelectListGroup { Name = mg.SupplyNumber },
+                    DataGroupField = mg.QuantityUnit.Name
+                })
                 .ToListAsync();
 
-            ViewBag.MedicationGroups = new SelectList(availableGroups, "ID", "Name");
+            ViewBag.MedicationGroups = availableGroups;
             ViewBag.WarehouseId = warehouseId;
             
             if (id == null)
@@ -71,7 +80,7 @@
         // POST: WarehouseMedicationGroup/CreateEdit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateEdit([Bind("ID,WarehouseID,MedicationGroupID,Quantity")] WarehouseMedicationGroup warehouseMedicationGroup)
+        public async Task<IActionResult> CreateEdit([Bind("ID,WarehouseID,MedicationGroupID,MinQuantity,MaxQuantity")] WarehouseMedicationGroup warehouseMedicationGroup)
         {
             if (ModelState.IsValid)
             {
@@ -85,6 +94,13 @@
                     return await PrepareViewForError(warehouseMedicationGroup);
                 }
 
+                // Prüfe ob MinQuantity <= MaxQuantity
+                if (warehouseMedicationGroup.MinQuantity > warehouseMedicationGroup.MaxQuantity)
+                {
+                    ModelState.AddModelError("", "Die Mindestmenge kann nicht größer als die Maximalmenge sein.");
+                    return await PrepareViewForError(warehouseMedicationGroup);
+                }
+
                 if (warehouseMedicationGroup.ID == 0)
                 {
                     _context.Add(warehouseMedicationGroup);
@@ -95,7 +111,7 @@
                 }
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index), new { warehouseId = warehouseMedicationGroup.WarehouseID });
+                return RedirectToAction("Index", "Warehouse");
             }
 
             return await PrepareViewForError(warehouseMedicationGroup);
@@ -109,11 +125,19 @@
                 .ToListAsync();
 
             var availableGroups = await _context.MedicationGroups
+                .Include(mg => mg.QuantityUnit)
                 .Where(mg => !existingGroupIds.Contains(mg.ID))
                 .OrderBy(mg => mg.Name)
+                .Select(mg => new SelectListItem
+                {
+                    Value = mg.ID.ToString(),
+                    Text = mg.Name,
+                    Group = new SelectListGroup { Name = mg.SupplyNumber },
+                    DataGroupField = mg.QuantityUnit.Name
+                })
                 .ToListAsync();
 
-            ViewBag.MedicationGroups = new SelectList(availableGroups, "ID", "Name", warehouseMedicationGroup.MedicationGroupID);
+            ViewBag.MedicationGroups = availableGroups;
             ViewBag.WarehouseId = warehouseMedicationGroup.WarehouseID;
             return View(warehouseMedicationGroup);
         }
@@ -137,16 +161,13 @@
             if (hasStock)
             {
                 TempData["ErrorMessage"] = "Die Medikamentengruppe kann nicht entfernt werden, da noch Bestände vorhanden sind.";
-                return RedirectToAction(nameof(Index), new { warehouseId = warehouseMedicationGroup.WarehouseID });
+                return RedirectToAction("Index", "Warehouse");
             }
 
             _context.WarehouseMedicationGroups.Remove(warehouseMedicationGroup);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { warehouseId = warehouseMedicationGroup.WarehouseID });
+            return RedirectToAction("Index", "Warehouse");
         }
     }
 }
-=======
-    ViewBag.MedicationGroups = availableGroups;
->>>>>>> 944b6f7aab3af13a534b4cdadac2fa78ef0ad4c6
