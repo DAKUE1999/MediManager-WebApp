@@ -36,6 +36,7 @@ namespace MediManager_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SupplyNumber,Name,QuantityUnitID")] MedicationGroup medicationGroup)
         {
+            ModelState.Remove("QuantityUnit");
             if (ModelState.IsValid)
             {
                 if (await _context.MedicationGroups.AnyAsync(m => m.SupplyNumber == medicationGroup.SupplyNumber))
@@ -82,6 +83,7 @@ namespace MediManager_WebApp.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove("QuantityUnit");
             if (ModelState.IsValid)
             {
                 if (await _context.MedicationGroups.AnyAsync(m => m.SupplyNumber == medicationGroup.SupplyNumber && m.ID != medicationGroup.ID))
