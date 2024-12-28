@@ -1,5 +1,6 @@
 using MediManager_WebApp.Database;
 using MediManager_WebApp.Models;
+using MediManager_WebApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -48,12 +49,12 @@ namespace MediManager_WebApp.Controllers
                 .Include(mg => mg.QuantityUnit)
                 .Where(mg => !existingGroupIds.Contains(mg.ID))
                 .OrderBy(mg => mg.Name)
-                .Select(mg => new SelectListItem
+                .Select(mg => new MedicationGroupSelectionViewModel
                 {
-                    Value = mg.ID.ToString(),
-                    Text = mg.Name,
-                    Group = new SelectListGroup { Name = mg.SupplyNumber },
-                    DataGroupField = mg.QuantityUnit.Name
+                    ID = mg.ID,
+                    Name = mg.Name,
+                    SupplyNumber = mg.SupplyNumber,
+                    UnitName = mg.QuantityUnit.Name
                 })
                 .ToListAsync();
 
@@ -80,7 +81,7 @@ namespace MediManager_WebApp.Controllers
         // POST: WarehouseMedicationGroup/CreateEdit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateEdit([Bind("ID,WarehouseID,MedicationGroupID,MinQuantity,MaxQuantity")] WarehouseMedicationGroup warehouseMedicationGroup)
+        public async Task<IActionResult> CreateEdit([Bind("ID,WarehouseID,MedicationGroupID,Quantity")] WarehouseMedicationGroup warehouseMedicationGroup)
         {
             if (ModelState.IsValid)
             {
@@ -91,13 +92,6 @@ namespace MediManager_WebApp.Controllers
                     wmg.ID != warehouseMedicationGroup.ID))
                 {
                     ModelState.AddModelError("", "Diese Medikamentengruppe ist bereits diesem Lager zugeordnet.");
-                    return await PrepareViewForError(warehouseMedicationGroup);
-                }
-
-                // Prüfe ob MinQuantity <= MaxQuantity
-                if (warehouseMedicationGroup.MinQuantity > warehouseMedicationGroup.MaxQuantity)
-                {
-                    ModelState.AddModelError("", "Die Mindestmenge kann nicht größer als die Maximalmenge sein.");
                     return await PrepareViewForError(warehouseMedicationGroup);
                 }
 
@@ -128,12 +122,12 @@ namespace MediManager_WebApp.Controllers
                 .Include(mg => mg.QuantityUnit)
                 .Where(mg => !existingGroupIds.Contains(mg.ID))
                 .OrderBy(mg => mg.Name)
-                .Select(mg => new SelectListItem
+                .Select(mg => new MedicationGroupSelectionViewModel
                 {
-                    Value = mg.ID.ToString(),
-                    Text = mg.Name,
-                    Group = new SelectListGroup { Name = mg.SupplyNumber },
-                    DataGroupField = mg.QuantityUnit.Name
+                    ID = mg.ID,
+                    Name = mg.Name,
+                    SupplyNumber = mg.SupplyNumber,
+                    UnitName = mg.QuantityUnit.Name
                 })
                 .ToListAsync();
 

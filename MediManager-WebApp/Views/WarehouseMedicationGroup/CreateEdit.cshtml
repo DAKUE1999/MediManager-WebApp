@@ -87,10 +87,10 @@
                         <tbody>
                             @foreach (var group in ViewBag.MedicationGroups)
                             {
-                                <tr onclick="selectGroup(@group.Value, '@group.Text')" style="cursor: pointer;">
-                                    <td>@group.Text</td>
-                                    <td>@group.Value</td>
-                                    <td>@group.DataGroupField</td>
+                                <tr onclick="selectGroup(@group.ID, '@group.Name')" style="cursor: pointer;">
+                                    <td>@group.Name</td>
+                                    <td>@group.SupplyNumber</td>
+                                    <td>@group.UnitName</td>
                                 </tr>
                             }
                         </tbody>
@@ -102,7 +102,9 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
         let modal;

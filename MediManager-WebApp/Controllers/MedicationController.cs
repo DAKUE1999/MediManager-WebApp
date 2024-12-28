@@ -1,8 +1,10 @@
 using MediManager_WebApp.Database;
 using MediManager_WebApp.Models;
+using MediManager_WebApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace MediManager_WebApp.Controllers
 {
@@ -28,11 +30,19 @@ namespace MediManager_WebApp.Controllers
         public async Task<IActionResult> CreateEdit(int? id)
         {
             // ViewBag für Dropdowns befüllen
-            ViewData["MedicationGroups"] = new SelectList(
-                await _context.MedicationGroups.OrderBy(mg => mg.Name).ToListAsync(),
-                "ID",
-                "Name"
-            );
+            var medicationGroups = await _context.MedicationGroups.Include(mg => mg.QuantityUnit).ToListAsync();
+            List<MedicationGroupSelectionViewModel> medicationGroupSelectionViewModel = new List<MedicationGroupSelectionViewModel>();
+            foreach (var group in medicationGroups)
+            {
+                medicationGroupSelectionViewModel.Add(new MedicationGroupSelectionViewModel
+                {
+                    ID = group.ID,
+                    Name = group.Name,
+                    SupplyNumber = group.SupplyNumber,
+                    UnitName = group.QuantityUnit.Name
+                });
+            }
+            ViewData["MedicationGroups"] = medicationGroupSelectionViewModel;
 
             if (id == null)
             {
@@ -55,7 +65,6 @@ namespace MediManager_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEdit([Bind("ID,MedicationGroupID,PZN,Name,Manufacturer,SAPNumber,SAPName")] Medication medication)
         {
-            ModelState.Remove("MedicationGroup");
             if (ModelState.IsValid)
             {
                 // Prüfe ob PZN bereits existiert
