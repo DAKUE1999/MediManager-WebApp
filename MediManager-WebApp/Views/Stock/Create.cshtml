@@ -17,43 +17,40 @@
 
     <div class="row">
         <div class="col-md-6">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="WarehouseID" />
-                <input type="hidden" asp-for="MedicationID" id="selectedMedicationId" />
+            <!-- Erste Eingabemaske: Nur PZN -->
+            <div class="card" id="pznInput">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">PZN eingeben</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="pzn" class="form-label">PZN</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="pzn" name="pzn" placeholder="PZN eingeben oder scannen...">
+                            <button class="btn btn-primary" type="button" onclick="checkPZN()">Prüfen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <!-- Medikamentengruppe -->
-                        <div class="form-group mb-3">
-                            <label class="control-label">Medikamentengruppe</label>
-                            <div class="input-group">
-                                <input type="text" id="selectedGroupDisplay" class="form-control" readonly 
-                                       placeholder="Bitte wählen Sie eine Gruppe aus" 
-                                       value="@Model.MedicationGroupName" />
-                                <button type="button" class="btn btn-outline-secondary" onclick="showGroupSelector()">
-                                    Auswählen
-                                </button>
-                            </div>
-                            <input type="hidden" asp-for="MedicationGroupID" id="selectedGroupId" />
-                            <span asp-validation-for="MedicationGroupID" class="text-danger"></span>
+            <!-- Wird angezeigt, wenn Medikament gefunden wurde -->
+            <div class="card d-none" id="stockInput">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Medikament einlagern</h5>
+                </div>
+                <div class="card-body">
+                    <form id="stockForm" asp-action="Create" method="post">
+                        <input type="hidden" asp-for="WarehouseID" />
+                        <input type="hidden" asp-for="MedicationID" />
+                        <input type="hidden" asp-for="MedicationGroupID" />
+
+                        <!-- Anzeige der Medikamenteninformationen -->
+                        <div class="alert alert-info">
+                            <div><strong>Name:</strong> <span id="medName"></span></div>
+                            <div><strong>Hersteller:</strong> <span id="medManufacturer"></span></div>
+                            <div><strong>Gruppe:</strong> <span id="medGroup"></span></div>
                         </div>
 
-                        <!-- Medikament (wird nach Gruppenauswahl aktiviert) -->
-                        <div class="form-group mb-3">
-                            <label class="control-label">Medikament</label>
-                            <div class="input-group">
-                                <input type="text" id="selectedMedicationDisplay" class="form-control" readonly 
-                                       placeholder="Wählen Sie zuerst eine Gruppe aus" 
-                                       value="@Model.MedicationName" />
-                                <button type="button" class="btn btn-outline-secondary" onclick="showMedicationSelector()" id="medicationSelectorBtn" disabled>
-                                    Auswählen
-                                </button>
-                            </div>
-                            <span asp-validation-for="MedicationID" class="text-danger"></span>
-                        </div>
-
-                        <!-- Regal -->
                         <div class="form-group mb-3">
                             <label asp-for="ShelfID" class="control-label">Regal</label>
                             <select asp-for="ShelfID" class="form-select" asp-items="ViewBag.Shelves">
@@ -62,28 +59,24 @@
                             <span asp-validation-for="ShelfID" class="text-danger"></span>
                         </div>
 
-                        <!-- Charge -->
                         <div class="form-group mb-3">
                             <label asp-for="Batch" class="control-label">Charge</label>
                             <input asp-for="Batch" class="form-control" />
                             <span asp-validation-for="Batch" class="text-danger"></span>
                         </div>
 
-                        <!-- Seriennummer -->
                         <div class="form-group mb-3">
                             <label asp-for="SerialNumber" class="control-label">Seriennummer</label>
                             <input asp-for="SerialNumber" class="form-control" />
                             <span asp-validation-for="SerialNumber" class="text-danger"></span>
                         </div>
 
-                        <!-- Verfallsdatum -->
                         <div class="form-group mb-3">
                             <label asp-for="ExpiryDate" class="control-label">Verfallsdatum</label>
                             <input asp-for="ExpiryDate" class="form-control" type="date" />
                             <span asp-validation-for="ExpiryDate" class="text-danger"></span>
                         </div>
 
-                        <!-- Menge -->
                         <div class="form-group mb-3">
                             <label asp-for="Quantity" class="control-label">Menge</label>
                             <input asp-for="Quantity" class="form-control" type="number" min="1" />
@@ -92,78 +85,9 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Einlagern</button>
-                            <a asp-action="Index" asp-route-warehouseId="@ViewBag.WarehouseId" class="btn btn-secondary">Zurück zur Liste</a>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">Zurück</button>
                         </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal für Gruppenauswahl -->
-<div class="modal fade" id="groupSelectorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Medikamentengruppe auswählen</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col">
-                        <input type="text" id="groupSearchInput" class="form-control" placeholder="Suchen..." />
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="groupsTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Versorgungsnummer</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var group in ViewBag.MedicationGroups)
-                            {
-                                <tr onclick="selectGroup(@group.ID, '@group.Name')" style="cursor: pointer;">
-                                    <td>@group.Name</td>
-                                    <td>@group.SupplyNumber</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal für Medikamentenauswahl -->
-<div class="modal fade" id="medicationSelectorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Medikament auswählen</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col">
-                        <input type="text" id="medicationSearchInput" class="form-control" placeholder="Suchen..." />
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="medicationsTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>PZN</th>
-                                <th>Hersteller</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    </form>
                 </div>
             </div>
         </div>
@@ -174,86 +98,44 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
-        let groupModal, medicationModal;
+        function checkPZN() {
+            const pzn = document.getElementById('pzn').value;
+            if (!pzn) {
+                alert('Bitte geben Sie eine PZN ein.');
+                return;
+            }
 
-        // Modal initialisieren
-        document.addEventListener('DOMContentLoaded', function () {
-            groupModal = new bootstrap.Modal(document.getElementById('groupSelectorModal'));
-            medicationModal = new bootstrap.Modal(document.getElementById('medicationSelectorModal'));
-        });
-
-        // Gruppen Modal
-        function showGroupSelector() {
-            groupModal.show();
-        }
-
-        function selectGroup(id, name) {
-            document.getElementById('selectedGroupId').value = id;
-            document.getElementById('selectedGroupDisplay').value = name;
-            document.getElementById('selectedMedicationId').value = '';
-            document.getElementById('selectedMedicationDisplay').value = '';
-            document.getElementById('medicationSelectorBtn').disabled = false;
-            groupModal.hide();
-            
-            // Lade Medikamente für diese Gruppe
-            loadMedicationsForGroup(id);
-        }
-
-        // Medikamenten Modal
-        function showMedicationSelector() {
-            medicationModal.show();
-        }
-
-        function selectMedication(id, name) {
-            document.getElementById('selectedMedicationId').value = id;
-            document.getElementById('selectedMedicationDisplay').value = name;
-            medicationModal.hide();
-        }
-
-        // Medikamente laden
-        function loadMedicationsForGroup(groupId) {
-            fetch(`/Stock/GetMedicationsForGroup/${groupId}`)
+            fetch(`/Stock/CheckPZN/${pzn}`)
                 .then(response => response.json())
-                .then(medications => {
-                    const tbody = document.querySelector('#medicationsTable tbody');
-                    tbody.innerHTML = '';
-                    
-                    medications.forEach(med => {
-                        const tr = document.createElement('tr');
-                        tr.style.cursor = 'pointer';
-                        tr.onclick = () => selectMedication(med.id, med.name);
-                        tr.innerHTML = `
-                            <td>${med.name}</td>
-                            <td>${med.pzn}</td>
-                            <td>${med.manufacturer}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+                .then(data => {
+                    if (data.found) {
+                        // Medikament gefunden -> Einlagerungsformular anzeigen
+                        showStockForm(data.medication);
+                    } else {
+                        // Medikament nicht gefunden -> Nachfragen
+                        if (confirm('Medikament nicht gefunden. Möchten Sie es anlegen?')) {
+                            window.location.href = `/Medication/Create?pzn=${pzn}&returnUrl=${encodeURIComponent(window.location.href)}`;
+                        }
+                    }
                 });
         }
 
-        // Suche in den Modals
-        function setupSearch(searchId, tableId) {
-            document.getElementById(searchId).addEventListener('keyup', function() {
-                const searchText = this.value.toLowerCase();
-                const table = document.getElementById(tableId);
-                const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-                for (let row of rows) {
-                    const cells = row.getElementsByTagName('td');
-                    let found = false;
-                    for (let cell of cells) {
-                        if (cell.textContent.toLowerCase().indexOf(searchText) > -1) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    row.style.display = found ? '' : 'none';
-                }
-            });
+        function showStockForm(medication) {
+            document.getElementById('pznInput').classList.add('d-none');
+            document.getElementById('stockInput').classList.remove('d-none');
+            
+            // Felder füllen
+            document.getElementById('medName').textContent = medication.name;
+            document.getElementById('medManufacturer').textContent = medication.manufacturer;
+            document.getElementById('medGroup').textContent = medication.groupName;
+            document.getElementById('MedicationID').value = medication.id;
+            document.getElementById('MedicationGroupID').value = medication.groupId;
         }
 
-        setupSearch('groupSearchInput', 'groupsTable');
-        setupSearch('medicationSearchInput', 'medicationsTable');
+        function resetForm() {
+            document.getElementById('pzn').value = '';
+            document.getElementById('pznInput').classList.remove('d-none');
+            document.getElementById('stockInput').classList.add('d-none');
+        }
     </script>
 }
