@@ -30,7 +30,7 @@ namespace MediManager_WebApp.Controllers
                     StockCount = w.Shelves.Sum(s => s.Stocks.Count),
                     ExpiringMedicationCount = w.Shelves
                         .SelectMany(s => s.Stocks)
-                        .Count(s => (DateTime.Parse(s.ExpireDate) <= DateTime.Today.AddMonths(1))),
+                        .Count(s => (s.ExpireDate <= DateTime.Today.AddMonths(1))),
                     Shelves = w.Shelves.Select(s => new DashboardShelfViewModel
                     {
                         ID = s.ID,
@@ -42,7 +42,7 @@ namespace MediManager_WebApp.Controllers
                             ID = st.ID,
                             MedicationName = st.Medication.Name,
                             Batch = st.Batch,
-                            ExpireDate = DateTime.Parse(st.ExpireDate),
+                            ExpireDate = st.ExpireDate,
                             Quantity = st.Quantity
                         }).ToList()
                     }).ToList()

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -8,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MediManager_WebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialize_Database : Migration
+    public partial class Initial_Migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -179,7 +180,7 @@ namespace MediManager_WebApp.Migrations
                     MedicationID = table.Column<int>(type: "integer", nullable: false),
                     Batch = table.Column<string>(type: "text", nullable: false),
                     SerialNumber = table.Column<string>(type: "text", nullable: true),
-                    ExpireDate = table.Column<string>(type: "text", nullable: false),
+                    ExpireDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -226,7 +227,7 @@ namespace MediManager_WebApp.Migrations
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     Batch = table.Column<string>(type: "text", nullable: false),
                     SerialNumber = table.Column<string>(type: "text", nullable: true),
-                    ExpireDate = table.Column<string>(type: "text", nullable: false),
+                    ExpireDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Timestamp = table.Column<string>(type: "text", nullable: false),
                     UserID = table.Column<int>(type: "integer", nullable: false)
                 },

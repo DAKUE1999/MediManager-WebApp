@@ -70,7 +70,7 @@
         public int MedicationID { get; set; }
         public string Batch { get; set; }
         public string? SerialNumber { get; set; }
-        public string ExpireDate { get; set; }
+        public DateTime ExpireDate { get; set; }
         public int Quantity { get; set; }
         public virtual Warehouse? Warehouse { get; set; }
         public virtual MedicationGroup? MedicationGroup { get; set; }
@@ -98,7 +98,7 @@
         public int Quantity { get; set; }
         public string Batch { get; set; }
         public string? SerialNumber { get; set; }
-        public string ExpireDate { get; set; }
+        public DateTime ExpireDate { get; set; }
         public string Timestamp { get; set; }
         public int UserID { get; set; }
         public virtual Warehouse? Warehouse { get; set; }

@@ -57,13 +57,21 @@ namespace MediManager_WebApp.Database
                     .HasForeignKey(s => s.MedicationGroupID);
 
                 entity.HasOne(s => s.Shelf)
-                    .WithMany()
+                    .WithMany(s => s.Stocks)
                     .HasForeignKey(s => s.ShelfID);
 
                 entity.HasOne(s => s.Medication)
                     .WithMany()
                     .HasForeignKey(s => s.MedicationID);
             });
+
+            modelBuilder.Entity<Stock>()
+                .Property(s => s.ExpireDate)
+                .HasColumnType("timestamp without time zone");
+
+            modelBuilder.Entity<StockMovement>()
+                .Property(s => s.ExpireDate)
+                .HasColumnType("timestamp without time zone");
 
             // StockMovement Beziehungen
             modelBuilder.Entity<StockMovement>(entity =>
