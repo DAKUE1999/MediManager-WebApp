@@ -51,12 +51,12 @@
                         <td>
                             @{
                                 var today = DateTime.Today;
-                                var daysUntilExpiry = (item.ExpiryDate.Date - today).Days;
+                                var daysUntilExpiry = (item.ExpireDate.Date - today).Days;
                                 var textClass = daysUntilExpiry <= 0 ? "text-danger" :
                                                daysUntilExpiry <= 30 ? "text-warning" :
                                                "text-dark";
                             }
-                            <span class="@textClass">@item.ExpiryDate.ToString("dd.MM.yyyy")</span>
+                            <span class="@textClass">@item.ExpireDate.ToString("dd.MM.yyyy")</span>
                         </td>
                         <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
                         <td>

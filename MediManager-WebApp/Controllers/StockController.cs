@@ -131,7 +131,7 @@ namespace MediManager_WebApp.Controllers
                 ShelfID = model.ShelfID,
                 Batch = model.Batch,
                 SerialNumber = model.SerialNumber,
-                ExpireDate = model.ExpireDate,
+                ExpireDate = model.ExpireDate.ToString(),
                 Quantity = model.Quantity
             };
 
