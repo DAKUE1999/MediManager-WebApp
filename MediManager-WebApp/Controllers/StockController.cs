@@ -17,7 +17,7 @@ namespace MediManager_WebApp.Controllers
 
         public IActionResult Create()
         {
-            return View(new StockViewModel());
+            return View(new StockViewModel{ Quantity = 1, ExpireDate = DateTime.Now});
         }
 
         [HttpPost]
@@ -26,20 +26,26 @@ namespace MediManager_WebApp.Controllers
             // Speichere eingegebene Werte
             SaveFormValues(model);
 
-            if (string.IsNullOrEmpty(model.PZN.ToString()))
+            if (string.IsNullOrEmpty(model.PZN))
             {
                 TempData["ErrorMessage"] = "Bitte geben Sie eine PZN ein.";
-                return RedirectToAction(nameof(Create));
+                return RedirectToAction(nameof(Create), model);
+            }
+
+            if (!Int64.TryParse(model.PZN, out long pzn))
+            {
+                TempData["ErrorMessage"] = "Die PZN ist keine reine numerische Zahl";
+                return RedirectToAction(nameof(Create), model);
             }
 
             var medication = await _context.Medications
                 .Include(m => m.MedicationGroup)
-                .FirstOrDefaultAsync(m => m.PZN == model.PZN);
+                .FirstOrDefaultAsync(m => m.PZN == Int32.Parse(model.PZN));
 
             if (medication == null)
             {
                 TempData["ErrorMessage"] = "Medikament nicht gefunden.";
-                return RedirectToAction(nameof(Create));
+                return RedirectToAction(nameof(Create), model);
             }
 
             // Speichere Medikamenteninformationen
@@ -68,7 +74,7 @@ namespace MediManager_WebApp.Controllers
         private void RestoreFormValues(StockViewModel model)
         {
             // Stelle alle Formularwerte aus dem TempData wieder her
-            if (TempData["PZN"] != null) model.PZN = Convert.ToInt32(TempData["PZN"]);
+            if (TempData["PZN"] != null) model.PZN = TempData["PZN"].ToString();
             if (TempData["WarehouseID"] != null) model.WarehouseID = Convert.ToInt32(TempData["WarehouseID"]);
             if (TempData["WarehouseName"] != null) model.WarehouseName = TempData["WarehouseName"].ToString();
             if (TempData["ShelfID"] != null) model.ShelfID = Convert.ToInt32(TempData["ShelfID"]);
@@ -79,12 +85,10 @@ namespace MediManager_WebApp.Controllers
             if (TempData["Quantity"] != null) model.Quantity = Convert.ToInt32(TempData["Quantity"]);
         }
 
-        public async Task<IActionResult> GetWarehouses(int medicationGroupId)
+        public async Task<IActionResult> GetWarehouses(string pzn)
         {
-            var warehouses = await _context.WarehouseMedicationGroups
-                .Where(wmg => wmg.MedicationGroupID == medicationGroupId)
-                .Select(wmg => wmg.Warehouse)
-                .ToListAsync();
+            var medication = await _context.Medications.FirstOrDefaultAsync(n => n.PZN == Int32.Parse(pzn));
+            var warehouses = await _context.WarehouseMedicationGroups.Where(n => n.MedicationGroupID == medication.MedicationGroupID).Select(w => w.Warehouse).ToListAsync();
 
             return PartialView("_WarehouseSelectorModal", warehouses);
         }
@@ -102,12 +106,6 @@ namespace MediManager_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StockViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                RestoreFormValues(model);
-                return View(model);
-            }
-
             if (!string.IsNullOrEmpty(model.SerialNumber) &&
                 await _context.Stocks.AnyAsync(s => s.SerialNumber == model.SerialNumber))
             {
@@ -123,11 +121,13 @@ namespace MediManager_WebApp.Controllers
                 return View(model);
             }
 
+            var medication = await _context.Medications.FirstOrDefaultAsync(n => n.PZN == Int32.Parse(model.PZN));
+
             var stock = new Stock
             {
                 WarehouseID = model.WarehouseID,
-                MedicationGroupID = model.MedicationGroupID,
-                MedicationID = model.MedicationID,
+                MedicationGroupID = medication.MedicationGroupID,
+                MedicationID = medication.ID,
                 ShelfID = model.ShelfID,
                 Batch = model.Batch,
                 SerialNumber = model.SerialNumber,
@@ -138,7 +138,7 @@ namespace MediManager_WebApp.Controllers
             _context.Stocks.Add(stock);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Create");
         }
     }
 }

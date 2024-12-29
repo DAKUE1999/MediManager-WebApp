@@ -33,14 +33,13 @@
             <div class="card">
                 <div class="card-body">
                     <form method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <!-- PZN mit Prüfbutton -->
                         <div class="form-group mb-3">
                             <label asp-for="PZN" class="control-label">PZN</label>
                             <div class="input-group">
-                                <input asp-for="PZN" class="form-control" />
-                                <button type="submit" asp-action="CheckPZN" class="btn btn-secondary">Prüfen</button>
+                                <input asp-for="PZN" type="text" id="pznInput" class="form-control" />
+                                <button type="submit" asp-action="CheckPZN" id="checkPZNButton" class="btn btn-secondary">Prüfen</button>
                             </div>
                             <span asp-validation-for="PZN" class="text-danger"></span>
                         </div>
@@ -57,7 +56,6 @@
                                 </button>
                             </div>
                             <input type="hidden" asp-for="WarehouseID" id="selectedWarehouseId" />
-                            <span asp-validation-for="WarehouseID" class="text-danger"></span>
                         </div>
 
                         <!-- Regal -->
@@ -72,33 +70,32 @@
                                 </button>
                             </div>
                             <input type="hidden" asp-for="ShelfID" id="selectedShelfId" />
-                            <span asp-validation-for="ShelfID" class="text-danger"></span>
                         </div>
 
                         <!-- Charge -->
                         <div class="form-group mb-3">
-                            <label asp-for="Batch" class="control-label">Charge</label>
+                            <label class="control-label">Charge</label>
                             <input asp-for="Batch" class="form-control" />
                             <span asp-validation-for="Batch" class="text-danger"></span>
                         </div>
 
                         <!-- Seriennummer -->
                         <div class="form-group mb-3">
-                            <label asp-for="SerialNumber" class="control-label">Seriennummer</label>
+                            <label class="control-label">Seriennummer</label>
                             <input asp-for="SerialNumber" class="form-control" />
                             <span asp-validation-for="SerialNumber" class="text-danger"></span>
                         </div>
 
                         <!-- Verfallsdatum -->
                         <div class="form-group mb-3">
-                            <label asp-for="ExpireDate" class="control-label">Verfallsdatum</label>
+                            <label class="control-label">Verfallsdatum</label>
                             <input asp-for="ExpireDate" class="form-control" type="date" />
                             <span asp-validation-for="ExpireDate" class="text-danger"></span>
                         </div>
 
                         <!-- Menge -->
                         <div class="form-group mb-3">
-                            <label asp-for="Quantity" class="control-label">Menge</label>
+                            <label class="control-label">Menge</label>
                             <input asp-for="Quantity" class="form-control" type="number" min="1" />
                             <span asp-validation-for="Quantity" class="text-danger"></span>
                         </div>
@@ -133,7 +130,6 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
         let warehouseModal, shelfModal;
@@ -145,8 +141,8 @@
         });
 
         function showWarehouseSelector() {
-            const medicationGroupId = '@ViewBag.MedicationGroupId';
-            fetch(`/Stock/GetWarehouses?medicationGroupId=${medicationGroupId}`)
+            const pzn = document.getElementById('pznInput').value
+            fetch(`/Stock/GetWarehouses?pzn=${pzn}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('warehouseModalContent').innerHTML = html;
