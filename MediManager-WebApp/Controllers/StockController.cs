@@ -21,9 +21,12 @@ namespace MediManager_WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CheckPZN(string pzn)
+        public async Task<IActionResult> CheckPZN(StockViewModel model)
         {
-            if (string.IsNullOrEmpty(pzn))
+            // Speichere eingegebene Werte
+            SaveFormValues(model);
+
+            if (string.IsNullOrEmpty(model.PZN.ToString()))
             {
                 TempData["ErrorMessage"] = "Bitte geben Sie eine PZN ein.";
                 return RedirectToAction(nameof(Create));
@@ -31,7 +34,7 @@ namespace MediManager_WebApp.Controllers
 
             var medication = await _context.Medications
                 .Include(m => m.MedicationGroup)
-                .FirstOrDefaultAsync(m => m.PZN == int.Parse(pzn));
+                .FirstOrDefaultAsync(m => m.PZN == model.PZN);
 
             if (medication == null)
             {
@@ -39,13 +42,41 @@ namespace MediManager_WebApp.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            ViewBag.MedicationGroupId = medication.MedicationGroupID;
-            return View("Create", new StockViewModel
-            {
-                PZN = int.Parse(pzn),
-                MedicationID = medication.ID,
-                MedicationGroupID = medication.MedicationGroupID
-            });
+            // Speichere Medikamenteninformationen
+            TempData["MedicationID"] = medication.ID;
+            TempData["MedicationGroupID"] = medication.MedicationGroupID;
+            TempData["MedicationName"] = medication.Name;
+            ViewBag.MedicationFound = true;
+
+            return View("Create", model);
+        }
+
+        private void SaveFormValues(StockViewModel model)
+        {
+            // Speichere alle Formularwerte im TempData
+            TempData["PZN"] = model.PZN;
+            TempData["WarehouseID"] = model.WarehouseID;
+            TempData["WarehouseName"] = model.WarehouseName;
+            TempData["ShelfID"] = model.ShelfID;
+            TempData["ShelfName"] = model.ShelfName;
+            TempData["Batch"] = model.Batch;
+            TempData["SerialNumber"] = model.SerialNumber;
+            TempData["ExpireDate"] = model.ExpireDate;
+            TempData["Quantity"] = model.Quantity;
+        }
+
+        private void RestoreFormValues(StockViewModel model)
+        {
+            // Stelle alle Formularwerte aus dem TempData wieder her
+            if (TempData["PZN"] != null) model.PZN = Convert.ToInt32(TempData["PZN"]);
+            if (TempData["WarehouseID"] != null) model.WarehouseID = Convert.ToInt32(TempData["WarehouseID"]);
+            if (TempData["WarehouseName"] != null) model.WarehouseName = TempData["WarehouseName"].ToString();
+            if (TempData["ShelfID"] != null) model.ShelfID = Convert.ToInt32(TempData["ShelfID"]);
+            if (TempData["ShelfName"] != null) model.ShelfName = TempData["ShelfName"].ToString();
+            if (TempData["Batch"] != null) model.Batch = TempData["Batch"].ToString();
+            if (TempData["SerialNumber"] != null) model.SerialNumber = TempData["SerialNumber"].ToString();
+            if (TempData["ExpireDate"] != null) model.ExpireDate = Convert.ToDateTime(TempData["ExpireDate"]);
+            if (TempData["Quantity"] != null) model.Quantity = Convert.ToInt32(TempData["Quantity"]);
         }
 
         public async Task<IActionResult> GetWarehouses(int medicationGroupId)
@@ -73,21 +104,22 @@ namespace MediManager_WebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                RestoreFormValues(model);
                 return View(model);
             }
 
-            // Validiere Seriennummer
             if (!string.IsNullOrEmpty(model.SerialNumber) &&
                 await _context.Stocks.AnyAsync(s => s.SerialNumber == model.SerialNumber))
             {
                 ModelState.AddModelError("SerialNumber", "Diese Seriennummer existiert bereits.");
+                RestoreFormValues(model);
                 return View(model);
             }
 
-            // Validiere Verfallsdatum
             if (model.ExpireDate.Date <= DateTime.Today)
             {
                 ModelState.AddModelError("ExpireDate", "Das Verfallsdatum muss in der Zukunft liegen.");
+                RestoreFormValues(model);
                 return View(model);
             }
 
