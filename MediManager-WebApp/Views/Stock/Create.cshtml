@@ -8,75 +8,88 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Warehouse" asp-action="Index">Lager</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index" asp-route-warehouseId="@ViewBag.WarehouseId">@ViewBag.WarehouseName</a></li>
             <li class="breadcrumb-item active" aria-current="page">Einlagern</li>
         </ol>
     </nav>
 
     <h1>@ViewData["Title"]</h1>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-6">
-            <!-- Erste Eingabemaske: Nur PZN -->
-            <div class="card" id="pznInput">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">PZN eingeben</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="pzn" class="form-label">PZN</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="pzn" name="pzn" placeholder="PZN eingeben oder scannen...">
-                            <button class="btn btn-primary" type="button" onclick="checkPZN()">Prüfen</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <!-- Wird angezeigt, wenn Medikament gefunden wurde -->
-            <div class="card d-none" id="stockInput">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Medikament einlagern</h5>
-                </div>
-                <div class="card-body">
-                    <form id="stockForm" asp-action="Create" method="post">
-                        <input type="hidden" asp-for="WarehouseID" />
-                        <input type="hidden" asp-for="MedicationID" />
-                        <input type="hidden" asp-for="MedicationGroupID" />
-
-                        <!-- Anzeige der Medikamenteninformationen -->
-                        <div class="alert alert-info">
-                            <div><strong>Name:</strong> <span id="medName"></span></div>
-                            <div><strong>Hersteller:</strong> <span id="medManufacturer"></span></div>
-                            <div><strong>Gruppe:</strong> <span id="medGroup"></span></div>
-                        </div>
-
+                <div class="card">
+                    <div class="card-body">
+                        <!-- PZN mit Prüfbutton -->
                         <div class="form-group mb-3">
-                            <label asp-for="ShelfID" class="control-label">Regal</label>
-                            <select asp-for="ShelfID" class="form-select" asp-items="ViewBag.Shelves">
-                                <option value="">-- Bitte wählen --</option>
-                            </select>
+                            <label asp-for="PZN" class="control-label">PZN</label>
+                            <div class="input-group">
+                                <input asp-for="PZN" class="form-control" />
+                                <button type="submit" asp-action="CheckPZN" class="btn btn-secondary">Prüfen</button>
+                            </div>
+                            <span asp-validation-for="PZN" class="text-danger"></span>
+                        </div>
+
+                        <!-- Lager auswählen -->
+                        <div class="form-group mb-3">
+                            <label class="control-label">Lager</label>
+                            <div class="input-group">
+                                <input type="text" id="selectedWarehouseDisplay" class="form-control" readonly 
+                                       placeholder="Bitte wählen Sie ein Lager aus" 
+                                       value="@(Model?.WarehouseName ?? "")" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="showWarehouseSelector()">
+                                    Auswählen
+                                </button>
+                            </div>
+                            <input type="hidden" asp-for="WarehouseID" id="selectedWarehouseId" />
+                            <span asp-validation-for="WarehouseID" class="text-danger"></span>
+                        </div>
+
+                        <!-- Regal auswählen -->
+                        <div class="form-group mb-3">
+                            <label class="control-label">Regal</label>
+                            <div class="input-group">
+                                <input type="text" id="selectedShelfDisplay" class="form-control" readonly 
+                                       placeholder="Wählen Sie zuerst ein Lager aus" 
+                                       value="@(Model?.ShelfName ?? "")" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="showShelfSelector()" id="shelfSelectorBtn" disabled>
+                                    Auswählen
+                                </button>
+                            </div>
+                            <input type="hidden" asp-for="ShelfID" id="selectedShelfId" />
                             <span asp-validation-for="ShelfID" class="text-danger"></span>
                         </div>
 
+                        <!-- Charge -->
                         <div class="form-group mb-3">
                             <label asp-for="Batch" class="control-label">Charge</label>
                             <input asp-for="Batch" class="form-control" />
                             <span asp-validation-for="Batch" class="text-danger"></span>
                         </div>
 
+                        <!-- Seriennummer -->
                         <div class="form-group mb-3">
                             <label asp-for="SerialNumber" class="control-label">Seriennummer</label>
                             <input asp-for="SerialNumber" class="form-control" />
                             <span asp-validation-for="SerialNumber" class="text-danger"></span>
                         </div>
 
+                        <!-- Verfallsdatum -->
                         <div class="form-group mb-3">
-                            <label asp-for="ExpiryDate" class="control-label">Verfallsdatum</label>
-                            <input asp-for="ExpiryDate" class="form-control" type="date" />
-                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                            <label asp-for="ExpireDate" class="control-label">Verfallsdatum</label>
+                            <input asp-for="ExpireDate" class="form-control" type="date" />
+                            <span asp-validation-for="ExpireDate" class="text-danger"></span>
                         </div>
 
+                        <!-- Menge -->
                         <div class="form-group mb-3">
                             <label asp-for="Quantity" class="control-label">Menge</label>
                             <input asp-for="Quantity" class="form-control" type="number" min="1" />
@@ -85,11 +98,29 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Einlagern</button>
-                            <button type="button" class="btn btn-secondary" onclick="resetForm()">Zurück</button>
+                            <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Lagerauswahl -->
+<div class="modal fade" id="warehouseSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div id="warehouseModalContent">
+            <!-- Wird durch AJAX gefüllt -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Regalauswahl -->
+<div class="modal fade" id="shelfSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div id="shelfModalContent">
+            <!-- Wird durch AJAX gefüllt -->
         </div>
     </div>
 </div>
@@ -98,44 +129,47 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
-        function checkPZN() {
-            const pzn = document.getElementById('pzn').value;
-            if (!pzn) {
-                alert('Bitte geben Sie eine PZN ein.');
-                return;
-            }
+        let warehouseModal, shelfModal;
 
-            fetch(`/Stock/CheckPZN/${pzn}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.found) {
-                        // Medikament gefunden -> Einlagerungsformular anzeigen
-                        showStockForm(data.medication);
-                    } else {
-                        // Medikament nicht gefunden -> Nachfragen
-                        if (confirm('Medikament nicht gefunden. Möchten Sie es anlegen?')) {
-                            window.location.href = `/Medication/Create?pzn=${pzn}&returnUrl=${encodeURIComponent(window.location.href)}`;
-                        }
-                    }
+        // Modal initialisieren
+        document.addEventListener('DOMContentLoaded', function () {
+            warehouseModal = new bootstrap.Modal(document.getElementById('warehouseSelectorModal'));
+            shelfModal = new bootstrap.Modal(document.getElementById('shelfSelectorModal'));
+        });
+
+        function showWarehouseSelector() {
+            const medicationGroupId = '@ViewBag.MedicationGroupId';
+            fetch(`/Stock/GetWarehouses?medicationGroupId=${medicationGroupId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('warehouseModalContent').innerHTML = html;
+                    warehouseModal.show();
                 });
         }
 
-        function showStockForm(medication) {
-            document.getElementById('pznInput').classList.add('d-none');
-            document.getElementById('stockInput').classList.remove('d-none');
-            
-            // Felder füllen
-            document.getElementById('medName').textContent = medication.name;
-            document.getElementById('medManufacturer').textContent = medication.manufacturer;
-            document.getElementById('medGroup').textContent = medication.groupName;
-            document.getElementById('MedicationID').value = medication.id;
-            document.getElementById('MedicationGroupID').value = medication.groupId;
+        function showShelfSelector() {
+            const warehouseId = document.getElementById('selectedWarehouseId').value;
+            fetch(`/Stock/GetShelves?warehouseId=${warehouseId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('shelfModalContent').innerHTML = html;
+                    shelfModal.show();
+                });
         }
 
-        function resetForm() {
-            document.getElementById('pzn').value = '';
-            document.getElementById('pznInput').classList.remove('d-none');
-            document.getElementById('stockInput').classList.add('d-none');
+        function selectWarehouse(id, name) {
+            document.getElementById('selectedWarehouseId').value = id;
+            document.getElementById('selectedWarehouseDisplay').value = name;
+            document.getElementById('selectedShelfId').value = '';
+            document.getElementById('selectedShelfDisplay').value = '';
+            document.getElementById('shelfSelectorBtn').disabled = false;
+            warehouseModal.hide();
+        }
+
+        function selectShelf(id, name) {
+            document.getElementById('selectedShelfId').value = id;
+            document.getElementById('selectedShelfDisplay').value = name;
+            shelfModal.hide();
         }
     </script>
 }
