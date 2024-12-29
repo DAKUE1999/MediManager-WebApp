@@ -21,85 +21,165 @@
         </div>
     }
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-6">
-            <!-- PZN-Prüfungs-Formular -->
-            <form asp-action="CheckPZN" method="post" id="pznForm">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="form-group">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <!-- PZN mit Prüfbutton -->
+                        <div class="form-group mb-3">
                             <label asp-for="PZN" class="control-label">PZN</label>
                             <div class="input-group">
-                                <input asp-for="PZN" class="form-control" value="@TempData["PZN"]" />
-                                <button type="submit" class="btn btn-secondary">Prüfen</button>
+                                <input asp-for="PZN" class="form-control" />
+                                <button type="submit" asp-action="CheckPZN" class="btn btn-secondary">Prüfen</button>
                             </div>
                             <span asp-validation-for="PZN" class="text-danger"></span>
                         </div>
-                    </div>
+
+                        <!-- Lager -->
+                        <div class="form-group mb-3">
+                            <label class="control-label">Lager</label>
+                            <div class="input-group">
+                                <input type="text" id="selectedWarehouseDisplay" class="form-control" readonly 
+                                       placeholder="Bitte wählen Sie ein Lager aus" 
+                                       value="@Model?.WarehouseName" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="showWarehouseSelector()">
+                                    Auswählen
+                                </button>
+                            </div>
+                            <input type="hidden" asp-for="WarehouseID" id="selectedWarehouseId" />
+                            <span asp-validation-for="WarehouseID" class="text-danger"></span>
+                        </div>
+
+                        <!-- Regal -->
+                        <div class="form-group mb-3">
+                            <label class="control-label">Regal</label>
+                            <div class="input-group">
+                                <input type="text" id="selectedShelfDisplay" class="form-control" readonly 
+                                       placeholder="Bitte wählen Sie ein Regal aus" 
+                                       value="@Model?.ShelfName" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="showShelfSelector()">
+                                    Auswählen
+                                </button>
+                            </div>
+                            <input type="hidden" asp-for="ShelfID" id="selectedShelfId" />
+                            <span asp-validation-for="ShelfID" class="text-danger"></span>
+                        </div>
+
+                        <!-- Charge -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Batch" class="control-label">Charge</label>
+                            <input asp-for="Batch" class="form-control" />
+                            <span asp-validation-for="Batch" class="text-danger"></span>
+                        </div>
+
+                        <!-- Seriennummer -->
+                        <div class="form-group mb-3">
+                            <label asp-for="SerialNumber" class="control-label">Seriennummer</label>
+                            <input asp-for="SerialNumber" class="form-control" />
+                            <span asp-validation-for="SerialNumber" class="text-danger"></span>
+                        </div>
+
+                        <!-- Verfallsdatum -->
+                        <div class="form-group mb-3">
+                            <label asp-for="ExpireDate" class="control-label">Verfallsdatum</label>
+                            <input asp-for="ExpireDate" class="form-control" type="date" />
+                            <span asp-validation-for="ExpireDate" class="text-danger"></span>
+                        </div>
+
+                        <!-- Menge -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Quantity" class="control-label">Menge</label>
+                            <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" asp-action="Create" class="btn btn-primary">Einlagern</button>
+                            <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
+                        </div>
+                    </form>
                 </div>
-            </form>
-
-            <!-- Einlagerungs-Formular -->
-            @if (ViewBag.MedicationFound == true)
-            {
-                <form asp-action="Create" method="post" id="stockForm">
-                    <input type="hidden" asp-for="PZN" value="@TempData["PZN"]" />
-                    <input type="hidden" asp-for="MedicationID" value="@TempData["MedicationID"]" />
-                    <input type="hidden" asp-for="MedicationGroupID" value="@TempData["MedicationGroupID"]" />
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">@TempData["MedicationName"]</h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Lager auswählen -->
-                            <div class="form-group mb-3">
-                                <label class="control-label">Lager</label>
-                                <div class="input-group">
-                                    <input type="text" id="selectedWarehouseDisplay" class="form-control" readonly 
-                                           placeholder="Bitte wählen Sie ein Lager aus" 
-                                           value="@TempData["WarehouseName"]" />
-                                    <button type="button" class="btn btn-outline-secondary" onclick="showWarehouseSelector()">
-                                        Auswählen
-                                    </button>
-                                </div>
-                                <input type="hidden" asp-for="WarehouseID" id="selectedWarehouseId" value="@TempData["WarehouseID"]" />
-                                <span asp-validation-for="WarehouseID" class="text-danger"></span>
-                            </div>
-
-                            <!-- Rest der Formularfelder -->
-                            <div class="form-group mb-3">
-                                <label asp-for="Batch" class="control-label">Charge</label>
-                                <input asp-for="Batch" class="form-control" value="@TempData["Batch"]" />
-                                <span asp-validation-for="Batch" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="SerialNumber" class="control-label">Seriennummer</label>
-                                <input asp-for="SerialNumber" class="form-control" value="@TempData["SerialNumber"]" />
-                                <span asp-validation-for="SerialNumber" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="ExpireDate" class="control-label">Verfallsdatum</label>
-                                <input asp-for="ExpireDate" class="form-control" type="date" value="@TempData["ExpireDate"]" />
-                                <span asp-validation-for="ExpireDate" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="Quantity" class="control-label">Menge</label>
-                                <input asp-for="Quantity" class="form-control" type="number" min="1" value="@TempData["Quantity"]" />
-                                <span asp-validation-for="Quantity" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary">Einlagern</button>
-                                <a asp-action="Index" class="btn btn-secondary">Zurück zur Liste</a>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            }
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal für Lagerauswahl -->
+<div class="modal fade" id="warehouseSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div id="warehouseModalContent">
+            <!-- Wird durch AJAX gefüllt -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Regalauswahl -->
+<div class="modal fade" id="shelfSelectorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div id="shelfModalContent">
+            <!-- Wird durch AJAX gefüllt -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        let warehouseModal, shelfModal;
+
+        // Modal initialisieren
+        document.addEventListener('DOMContentLoaded', function () {
+            warehouseModal = new bootstrap.Modal(document.getElementById('warehouseSelectorModal'));
+            shelfModal = new bootstrap.Modal(document.getElementById('shelfSelectorModal'));
+        });
+
+        function showWarehouseSelector() {
+            const medicationGroupId = '@ViewBag.MedicationGroupId';
+            fetch(`/Stock/GetWarehouses?medicationGroupId=${medicationGroupId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('warehouseModalContent').innerHTML = html;
+                    warehouseModal.show();
+                });
+        }
+
+        function showShelfSelector() {
+            const warehouseId = document.getElementById('selectedWarehouseId').value;
+            if (!warehouseId) {
+                alert('Bitte wählen Sie zuerst ein Lager aus.');
+                return;
+            }
+            fetch(`/Stock/GetShelves?warehouseId=${warehouseId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('shelfModalContent').innerHTML = html;
+                    shelfModal.show();
+                });
+        }
+
+        function selectWarehouse(id, name) {
+            document.getElementById('selectedWarehouseId').value = id;
+            document.getElementById('selectedWarehouseDisplay').value = name;
+            document.getElementById('selectedShelfId').value = '';
+            document.getElementById('selectedShelfDisplay').value = '';
+            warehouseModal.hide();
+        }
+
+        function selectShelf(id, name) {
+            document.getElementById('selectedShelfId').value = id;
+            document.getElementById('selectedShelfDisplay').value = name;
+            shelfModal.hide();
+        }
+    </script>
+}
