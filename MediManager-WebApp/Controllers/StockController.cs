@@ -2,7 +2,6 @@ using MediManager_WebApp.Database;
 using MediManager_WebApp.Models;
 using MediManager_WebApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediManager_WebApp.Controllers
@@ -16,158 +15,98 @@ namespace MediManager_WebApp.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int warehouseId)
+        public IActionResult Create()
         {
-            var warehouse = await _context.Warehouses
-                .Include(w => w.Shelves)
-                .FirstOrDefaultAsync(w => w.ID == warehouseId);
-
-            if (warehouse == null)
-            {
-                return NotFound();
-            }
-
-            var stocks = await _context.Stocks
-                .Include(s => s.Warehouse)
-                .Include(s => s.MedicationGroup)
-                .Include(s => s.Medication)
-                .Include(s => s.Shelf)
-                .Where(s => s.WarehouseID == warehouseId)
-                .Select(s => new StockViewModel
-                {
-                    ID = s.ID,
-                    WarehouseID = s.WarehouseID,
-                    WarehouseName = s.Warehouse.Name,
-                    MedicationGroupID = s.MedicationGroupID,
-                    MedicationGroupName = s.MedicationGroup.Name,
-                    MedicationID = s.MedicationID,
-                    MedicationName = s.Medication.Name,
-                    ShelfID = s.ShelfID,
-                    ShelfName = s.Shelf.Name,
-                    Batch = s.Batch,
-                    SerialNumber = s.SerialNumber,
-                    ExpiryDate = s.ExpiryDate,
-                    Quantity = s.Quantity
-                })
-                .ToListAsync();
-
-            ViewBag.WarehouseName = warehouse.Name;
-            ViewBag.WarehouseId = warehouse.ID;
-
-            return View(stocks);
+            return View(new StockViewModel());
         }
 
-        public async Task<IActionResult> Create(int warehouseId)
+        [HttpPost]
+        public async Task<IActionResult> CheckPZN(string pzn)
         {
-            var warehouse = await _context.Warehouses
-                .Include(w => w.Shelves)
-                .FirstOrDefaultAsync(w => w.ID == warehouseId);
-
-            if (warehouse == null)
+            if (string.IsNullOrEmpty(pzn))
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Bitte geben Sie eine PZN ein.";
+                return RedirectToAction(nameof(Create));
             }
 
-            ViewBag.WarehouseName = warehouse.Name;
-            ViewBag.WarehouseId = warehouse.ID;
-            ViewBag.Shelves = new SelectList(warehouse.Shelves, "ID", "Name");
-
-            return View(new StockViewModel
-            {
-                WarehouseID = warehouseId,
-                ExpiryDate = DateTime.Today.AddMonths(1)
-            });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> CheckPZN(int pzn)
-        {
             var medication = await _context.Medications
                 .Include(m => m.MedicationGroup)
-                .FirstOrDefaultAsync(m => m.PZN == pzn);
+                .FirstOrDefaultAsync(m => m.PZN == int.Parse(pzn));
 
             if (medication == null)
             {
-                return Json(new { found = false });
+                TempData["ErrorMessage"] = "Medikament nicht gefunden.";
+                return RedirectToAction(nameof(Create));
             }
 
-            // Prüfen ob die Gruppe dem Lager zugeordnet ist
-            var hasGroup = await _context.WarehouseMedicationGroups
-                .AnyAsync(wmg => wmg.WarehouseID == medication.MedicationGroupID);
-
-            if (!hasGroup)
+            ViewBag.MedicationGroupId = medication.MedicationGroupID;
+            return View("Create", new StockViewModel
             {
-                return Json(new { 
-                    found = false,
-                    errorMessage = $"Die Medikamentengruppe '{medication.MedicationGroup.Name}' ist diesem Lager noch nicht zugeordnet."
-                });
-            }
-
-            return Json(new
-            {
-                found = true,
-                medication = new
-                {
-                    id = medication.ID,
-                    name = medication.Name,
-                    manufacturer = medication.Manufacturer,
-                    groupId = medication.MedicationGroupID,
-                    groupName = medication.MedicationGroup.Name
-                }
+                PZN = int.Parse(pzn),
+                MedicationID = medication.ID,
+                MedicationGroupID = medication.MedicationGroupID
             });
+        }
+
+        public async Task<IActionResult> GetWarehouses(int medicationGroupId)
+        {
+            var warehouses = await _context.WarehouseMedicationGroups
+                .Where(wmg => wmg.MedicationGroupID == medicationGroupId)
+                .Select(wmg => wmg.Warehouse)
+                .ToListAsync();
+
+            return PartialView("_WarehouseSelectorModal", warehouses);
+        }
+
+        public async Task<IActionResult> GetShelves(int warehouseId)
+        {
+            var shelves = await _context.Shelves
+                .Where(s => s.WarehouseID == warehouseId)
+                .ToListAsync();
+
+            return PartialView("_ShelfSelectorModal", shelves);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StockViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                if (!string.IsNullOrEmpty(model.SerialNumber) &&
-                    await _context.Stocks.AnyAsync(s => s.SerialNumber == model.SerialNumber))
-                {
-                    ModelState.AddModelError("SerialNumber", "Diese Seriennummer existiert bereits.");
-                    return await PrepareViewForError(model);
-                }
-
-                if (model.ExpiryDate.Date <= DateTime.Today)
-                {
-                    ModelState.AddModelError("ExpiryDate", "Das Verfallsdatum muss in der Zukunft liegen.");
-                    return await PrepareViewForError(model);
-                }
-
-                var stock = new Stock
-                {
-                    WarehouseID = model.WarehouseID,
-                    MedicationGroupID = model.MedicationGroupID,
-                    MedicationID = model.MedicationID,
-                    ShelfID = model.ShelfID,
-                    Batch = model.Batch,
-                    SerialNumber = model.SerialNumber,
-                    ExpiryDate = model.ExpiryDate,
-                    Quantity = model.Quantity
-                };
-
-                _context.Add(stock);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index), new { warehouseId = model.WarehouseID });
+                return View(model);
             }
 
-            return await PrepareViewForError(model);
-        }
+            // Validiere Seriennummer
+            if (!string.IsNullOrEmpty(model.SerialNumber) &&
+                await _context.Stocks.AnyAsync(s => s.SerialNumber == model.SerialNumber))
+            {
+                ModelState.AddModelError("SerialNumber", "Diese Seriennummer existiert bereits.");
+                return View(model);
+            }
 
-        private async Task<IActionResult> PrepareViewForError(StockViewModel model)
-        {
-            var warehouse = await _context.Warehouses
-                .Include(w => w.Shelves)
-                .FirstOrDefaultAsync(w => w.ID == model.WarehouseID);
+            // Validiere Verfallsdatum
+            if (model.ExpireDate.Date <= DateTime.Today)
+            {
+                ModelState.AddModelError("ExpireDate", "Das Verfallsdatum muss in der Zukunft liegen.");
+                return View(model);
+            }
 
-            ViewBag.WarehouseName = warehouse.Name;
-            ViewBag.WarehouseId = warehouse.ID;
-            ViewBag.Shelves = new SelectList(warehouse.Shelves, "ID", "Name", model.ShelfID);
+            var stock = new Stock
+            {
+                WarehouseID = model.WarehouseID,
+                MedicationGroupID = model.MedicationGroupID,
+                MedicationID = model.MedicationID,
+                ShelfID = model.ShelfID,
+                Batch = model.Batch,
+                SerialNumber = model.SerialNumber,
+                ExpireDate = model.ExpireDate,
+                Quantity = model.Quantity
+            };
 
-            return View(model);
+            _context.Stocks.Add(stock);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
