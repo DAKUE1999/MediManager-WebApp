@@ -1,8 +1,126 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model IEnumerable<MediManager_WebApp.Models.ViewModels.WarehouseDashboardViewModel>
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <!-- Globale Aktionen -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group" role="group">
+                <a asp-controller="Stock" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Einlagern
+                </a>
+                <a asp-controller="Stock" asp-action="BatchOut" class="btn btn-warning">
+                    <i class="bi bi-box-arrow-right"></i> Auslagern
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lager Übersicht -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        @foreach (var warehouse in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">@warehouse.Name</h5>
+                            <span class="badge bg-secondary">@warehouse.Location</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Lager Statistiken -->
+                        <div class="row mb-3">
+                            <div class="col-4 text-center">
+                                <div class="h4 mb-0">@warehouse.ShelfCount</div>
+                                <small class="text-muted">Regale</small>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="h4 mb-0">@warehouse.StockCount</div>
+                                <small class="text-muted">Medikamente</small>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="h4 mb-0 @(warehouse.ExpiringMedicationCount > 0 ? "text-danger" : "")">
+                                    @warehouse.ExpiringMedicationCount
+                                </div>
+                                <small class="text-muted">Ablaufend</small>
+                            </div>
+                        </div>
+
+                        <!-- Regale Accordion -->
+                        <div class="accordion" id="shelves-@warehouse.ID">
+                            @foreach (var shelf in warehouse.Shelves)
+                            {
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#shelf-@shelf.ID">
+                                            @shelf.Name (@shelf.StockCount)
+                                        </button>
+                                    </h2>
+                                    <div id="shelf-@shelf.ID" class="accordion-collapse collapse" 
+                                         data-bs-parent="#shelves-@warehouse.ID">
+                                        <div class="accordion-body p-0">
+                                            @if (shelf.Stocks.Any())
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Medikament</th>
+                                                                <th>Charge</th>
+                                                                <th>Verfall</th>
+                                                                <th>Menge</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var stock in shelf.Stocks)
+                                                            {
+                                                                <tr>
+                                                                    <td>@stock.MedicationName</td>
+                                                                    <td>@stock.Batch</td>
+                                                                    <td>
+                                                                        @{
+                                                                            var daysUntilExpiry = (stock.ExpireDate.Date - DateTime.Today).Days;
+                                                                            var textClass = daysUntilExpiry <= 0 ? "text-danger" :
+                                                                                           daysUntilExpiry <= 30 ? "text-warning" :
+                                                                                           "";
+                                                                        }
+                                                                        <span class="@textClass">@stock.ExpireDate.ToString("dd.MM.yyyy")</span>
+                                                                    </td>
+                                                                    <td>@stock.Quantity</td>
+                                                                    <td>
+                                                                        <a asp-controller="Stock" asp-action="Out" 
+                                                                           asp-route-id="@stock.ID"
+                                                                           class="btn btn-sm btn-warning">
+                                                                            Auslagern
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="p-3 text-center text-muted">
+                                                    Keine Medikamente im Regal
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
