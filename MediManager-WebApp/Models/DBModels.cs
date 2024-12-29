@@ -56,6 +56,7 @@
         public int WarehouseID { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
+        public virtual ICollection<Stock>? Stocks { get; set; } = new List<Stock>();
 
         public virtual Warehouse? Warehouse { get; set; }
     }

@@ -8,16 +8,16 @@ namespace MediManager_WebApp.Models.ViewModels
         public int ShelfCount { get; set; }
         public int StockCount { get; set; }
         public int ExpiringMedicationCount { get; set; }
-        public List<ShelfViewModel> Shelves { get; set; }
+        public List<DashboardShelfViewModel> Shelves { get; set; } = new List<DashboardShelfViewModel>();
     }
 
-    public class ShelfViewModel
+    public class DashboardShelfViewModel
     {
         public int ID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int StockCount { get; set; }
-        public List<StockListViewModel> Stocks { get; set; }
+        public List<StockListViewModel> Stocks { get; set; } = new List<StockListViewModel>();
     }
 
     public class StockListViewModel
