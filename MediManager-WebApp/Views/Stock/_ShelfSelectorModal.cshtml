@@ -1,0 +1,62 @@
+@model IEnumerable<MediManager_WebApp.Models.Shelf>
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Regal auswählen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row mb-3">
+            <div class="col">
+                <input type="text" id="shelfSearchInput" class="form-control" placeholder="Suchen..." />
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="shelvesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortShelfTable(0)">Name</th>
+                        <th onclick="sortShelfTable(1)">Beschreibung</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var shelf in Model)
+                    {
+                        <tr onclick="selectShelf(@shelf.ID, '@shelf.Name')" style="cursor: pointer;">
+                            <td>@shelf.Name</td>
+                            <td>@shelf.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('shelfSearchInput').addEventListener('keyup', function() {
+        const searchText = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#shelvesTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchText) ? '' : 'none';
+        });
+    });
+
+    function sortShelfTable(columnIndex) {
+        const table = document.getElementById('shelvesTable');
+        const tbody = table.getElementsByTagName('tbody')[0];
+        const rows = Array.from(tbody.getElementsByTagName('tr'));
+        const isAsc = table.getAttribute('data-sort-dir-' + columnIndex) !== 'asc';
+
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent.trim();
+            const bValue = b.cells[columnIndex].textContent.trim();
+            return isAsc ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        });
+
+        table.setAttribute('data-sort-dir-' + columnIndex, isAsc ? 'asc' : 'desc');
+        tbody.append(...rows);
+    }
+</script>
