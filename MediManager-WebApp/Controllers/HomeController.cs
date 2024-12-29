@@ -1,32 +1,55 @@
-using System.Diagnostics;
+using MediManager_WebApp.Database;
 using MediManager_WebApp.Models;
+using MediManager_WebApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediManager_WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly MediManagerDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(MediManagerDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var warehouses = await _context.Warehouses
+                .Include(w => w.Shelves)
+                    .ThenInclude(s => s.Stocks)
+                        .ThenInclude(s => s.Medication)
+                .Select(w => new WarehouseDashboardViewModel
+                {
+                    ID = w.ID,
+                    Name = w.Name,
+                    Location = w.Location,
+                    ShelfCount = w.Shelves.Count,
+                    StockCount = w.Shelves.Sum(s => s.Stocks.Count),
+                    ExpiringMedicationCount = w.Shelves
+                        .SelectMany(s => s.Stocks)
+                        .Count(s => s.ExpireDate <= DateTime.Today.AddMonths(1)),
+                    Shelves = w.Shelves.Select(s => new ShelfViewModel
+                    {
+                        ID = s.ID,
+                        Name = s.Name,
+                        Description = s.Description,
+                        StockCount = s.Stocks.Count,
+                        Stocks = s.Stocks.Select(st => new StockListViewModel
+                        {
+                            ID = st.ID,
+                            MedicationName = st.Medication.Name,
+                            Batch = st.Batch,
+                            ExpireDate = st.ExpireDate,
+                            Quantity = st.Quantity
+                        }).ToList()
+                    }).ToList()
+                })
+                .ToListAsync();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(warehouses);
         }
     }
 }
